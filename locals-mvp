@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Locals – Mappe umane (MVP di validazione)</title>
+  <meta name="description" content="Scegli una mappa curata da un Local fittizio, sblocca e visualizza i luoghi consigliati per il tuo pernottamento." />
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
+  <!-- Minimal CSS (utility-style) -->
+  <style>
+    :root { --bg: #0b0d12; --card:#141821; --muted:#9aa3b2; --text:#e6e9ef; --accent:#7dd3fc; --accent2:#86efac; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial}
+    a{color:var(--accent)}
+    .container{max-width:1100px;margin:0 auto;padding:24px}
+    .header{display:flex;justify-content:space-between;align-items:center;gap:16px}
+    .logo{font-weight:700;letter-spacing:.3px}
+    .badge{border:1px solid #2a3040;padding:4px 8px;border-radius:999px;color:var(--muted);font-size:12px}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    @media (max-width:960px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:640px){.grid{grid-template-columns:1fr}}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid #222838;border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+    .card-head{padding:16px;border-bottom:1px solid #1a1f2b;display:flex;align-items:center;gap:12px}
+    .avatar{width:40px;height:40px;border-radius:999px;background:#222;display:grid;place-items:center;font-weight:700}
+    .pill{font-size:12px;color:#bcd; background:#1a2232;border:1px solid #283149;border-radius:999px;padding:4px 8px;margin-right:6px;white-space:nowrap}
+    .card-body{padding:16px;flex:1}
+    .card-footer{padding:16px;border-top:1px solid #1a1f2b;display:flex;justify-content:space-between;align-items:center}
+    .btn{background:#1b2335;color:#eaf2ff;border:1px solid #2a3550;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
+    .btn:hover{filter:brightness(1.1)}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),#60a5fa);color:#06213a;border:none}
+    .btn-ghost{background:transparent;border:1px solid #2a2f40;color:#cbd5e1}
+
+    .hero{margin:12px 0 24px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .hero h1{margin:0;font-size:28px}
+    .hero p{margin:4px 0;color:var(--muted)}
+
+    /* Modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center;padding:16px;z-index:50}
+    .modal{width:min(780px,100%);background:var(--card);border:1px solid #22293a;border-radius:18px;overflow:hidden}
+    .modal-head{padding:16px 18px;border-bottom:1px solid #1d2332;display:flex;justify-content:space-between;align-items:center}
+    .modal-body{display:grid;grid-template-columns:380px 1fr}
+    @media (max-width:900px){.modal-body{grid-template-columns:1fr}}
+    .modal-left{padding:16px;border-right:1px solid #1d2332}
+    .modal-right{padding:16px}
+    label{display:block;font-size:13px;color:#b7c0cf;margin:10px 0 6px}
+    input, select, textarea{width:100%;background:#121724;border:1px solid #273047;color:#e6ecf7;border-radius:10px;padding:10px}
+
+    #map{height:520px;border-radius:12px;border:1px solid #22293a}
+
+    .chips{display:flex;flex-wrap:wrap;gap:6px}
+    .chip{font-size:12px;padding:6px 10px;border-radius:999px;background:#172033;border:1px solid #22304a;color:#d9e3f2}
+
+    .footer{margin-top:28px;color:#93a0b5;font-size:13px}
+    .hidden{display:none !important}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">🌍 <strong>Locals</strong> — mappe umane</div>
+      <div class="badge">MVP di validazione • no login • dati fittizi</div>
+    </header>
+
+    <section class="hero">
+      <div>
+        <h1>Scegli una mappa curata da un Local</h1>
+        <p>Ogni mappa è una selezione ragionata di luoghi e micro‑esperienze. Sblocca una mappa per visualizzare tutti i punti.</p>
+      </div>
+      <div>
+        <button id="btnReset" class="btn btn-ghost">Reset scelte</button>
+      </div>
+    </section>
+
+    <!-- Cards elenco Local -->
+    <section id="cards" class="grid"></section>
+
+    <!-- Modal: Unlock & Map -->
+    <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true">
+      <div class="modal">
+        <div class="modal-head">
+          <div>
+            <div id="modalTitle" style="font-weight:700"></div>
+            <div id="modalSubtitle" style="font-size:13px;color:#9fb3d1"></div>
+          </div>
+          <button id="modalClose" class="btn">Chiudi</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-left">
+            <form id="unlockForm">
+              <p style="margin:0 0 8px;color:#b4c2d8">Per sbloccare la mappa compila questi campi (validazione):</p>
+              <label for="email">Email</label>
+              <input id="email" type="email" required placeholder="nome@email.com" />
+
+              <label for="nights">Notti in città</label>
+              <select id="nights">
+                <option>1</option><option selected>2</option><option>3</option><option>4+</option>
+              </select>
+
+              <label for="interests">Interessi principali</label>
+              <select id="interests" multiple size="4">
+                <option>Foodie</option>
+                <option>Arte & cultura</option>
+                <option>Natura</option>
+                <option>Nightlife</option>
+              </select>
+
+              <label for="notes">Note opzionali</label>
+              <textarea id="notes" rows="4" placeholder="Es. senza glutine, budget, zone preferite…"></textarea>
+
+              <div style="display:flex;gap:8px;margin-top:12px">
+                <button class="btn btn-primary" type="submit">Sblocca mappa</button>
+                <button class="btn" type="button" id="btnSkip">Salta</button>
+              </div>
+              <p style="color:#8fa0ba;font-size:12px;margin-top:8px">Compilando ci aiuti a validare il prodotto. I dati restano interni alla sperimentazione.</p>
+            </form>
+          </div>
+          <div class="modal-right">
+            <div id="map"></div>
+            <div id="poiList" style="margin-top:10px;color:#c8d3e5;font-size:14px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>Questo è un prototipo di validazione: contenuti, profili e luoghi possono essere incompleti o fittizi.</p>
+    </footer>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <script>
+    // ==========================
+    //  CONFIGURAZIONE DATI MVP
+    // ==========================
+    // Aggiungi/rimuovi mappe qui sotto: ogni mappa ha un autore fittizio, interessi e POI.
+    const MAPS = [
+      {
+        id: "mi-foodie",
+        city: "Milano",
+        title: "Milano Foodie & Design",
+        author: { name: "Giulia R.", tagline: "Product designer & panettone snob", avatar: "G" },
+        interests: ["Foodie", "Design", "Caffè di quartiere"],
+        priceHint: "€7 (validazione)",
+        center: [45.463, 9.189],
+        poi: [
+          { name: "Trippa", type: "Ristorante", coords: [45.4508, 9.2054], note: "Osteria contemporanea, prenota prima." },
+          { name: "Bar Luce", type: "Caffè", coords: [45.4516, 9.1796], note: "Estetica Wes Anderson dentro la Fondazione Prada." },
+          { name: "Pavé", type: "Bakery", coords: [45.4773, 9.2058], note: "Croissant e torte — ottimo per colazione." },
+          { name: "NoLo walk", type: "Passeggiata", coords: [45.4970, 9.2185], note: "Mercati etnici e bar di quartiere." }
+        ]
+      },
+      {
+        id: "na-art-night",
+        city: "Napoli",
+        title: "Napoli Arte & Nightlife",
+        author: { name: "Marco C.", tagline: "Storico dell'arte di giorno, DJ di notte", avatar: "M" },
+        interests: ["Arte & cultura", "Nightlife", "Street food"],
+        priceHint: "€6 (validazione)",
+        center: [40.8518, 14.2681],
+        poi: [
+          { name: "Museo MADRE", type: "Museo", coords: [40.8537, 14.2610], note: "Contemporanea in un palazzo storico." },
+          { name: "Spaccanapoli", type: "Itinerario", coords: [40.8496, 14.2597], note: "Cardine della città antica." },
+          { name: "Pizzeria 50 Kalò", type: "Pizzeria", coords: [40.8294, 14.2199], note: "Impasti leggendari." },
+          { name: "Lido Notturno", type: "Club", coords: [40.8175, 14.2258], note: "Serate estive sul mare (stagionale)." }
+        ]
+      },
+      {
+        id: "rm-classic-hidden",
+        city: "Roma",
+        title: "Roma Classici & Nascosti",
+        author: { name: "Sara P.", tagline: "Archivista con ossessione per i cortili romani", avatar: "S" },
+        interests: ["Storia", "Fotografia", "Giardini"],
+        priceHint: "€8 (validazione)",
+        center: [41.9028, 12.4964],
+        poi: [
+          { name: "Gianicolo belvedere", type: "Panorama", coords: [41.8925, 12.4612], note: "Tramonto su Roma." },
+          { name: "Coppedè", type: "Quartiere", coords: [41.9197, 12.5116], note: "Architettura fiabesca e dettagli liberty." },
+          { name: "Da Remo", type: "Pizzeria", coords: [41.8809, 12.4768], note: "Stile romano DOC a Testaccio." },
+          { name: "Orto Botanico", type: "Giardino", coords: [41.8938, 12.4660], note: "Oasi verde a Trastevere." }
+        ]
+      }
+    ];
+
+    // Endpoint facoltativo per raccogliere submission (Formspree/Google Apps Script ecc.)
+    // Sostituisci con il tuo endpoint o lascia vuoto per usare solo localStorage.
+    const SUBMIT_ENDPOINT = ""; // es. "https://formspree.io/f/xxxxxxx"
+
+    // ==========================
+    //  RENDER CARDS
+    // ==========================
+    const cardsEl = document.getElementById('cards');
+
+    function chipHtml(text){ return `<span class="pill">${text}</span>` }
+
+    function cardHtml(map){
+      return `
+      <article class="card">
+        <div class="card-head">
+          <div class="avatar">${map.author.avatar}</div>
+          <div>
+            <div style="font-weight:700">${map.title} • ${map.city}</div>
+            <div style="font-size:13px;color:#9fb3d1">${map.author.name} — ${map.author.tagline}</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chips">${map.interests.map(chipHtml).join('')}</div>
+        </div>
+        <div class="card-footer">
+          <span style="color:#9ab; font-size:14px">${map.priceHint}</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="previewMap('${map.id}')">Anteprima</button>
+            <button class="btn btn-primary" onclick="openModal('${map.id}')">Sblocca</button>
+          </div>
+        </div>
+      </article>`
+    }
+
+    function renderCards(){
+      cardsEl.innerHTML = MAPS.map(cardHtml).join('');
+    }
+
+    // ==========================
+    //  MODAL + MAP LOGIC
+    // ==========================
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalSubtitle = document.getElementById('modalSubtitle');
+    const mapDiv = document.getElementById('map');
+    const poiList = document.getElementById('poiList');
+    const unlockForm = document.getElementById('unlockForm');
+    const btnSkip = document.getElementById('btnSkip');
+
+    let mapInstance = null;
+    let currentMap = null;
+
+    function openModal(mapId){
+      const m = MAPS.find(x => x.id === mapId);
+      currentMap = m;
+      modalTitle.textContent = `${m.title} • ${m.city}`;
+      modalSubtitle.textContent = `${m.author.name} — ${m.author.tagline}`;
+      modal.style.display = 'grid';
+      setTimeout(initMap, 0);
+    }
+
+    function closeModal(){ modal.style.display = 'none'; }
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+
+    function previewMap(mapId){
+      openModal(mapId);
+      // Solo anteprima: non richiediamo form per centrare la mappa e mostrare marker
+      // L'utente può cliccare "Salta" per vedere subito i punti.
+    }
+
+    function initMap(){
+      if(!currentMap) return;
+      // reset list
+      poiList.innerHTML = '';
+
+      if(!mapInstance){
+        mapInstance = L.map('map');
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(mapInstance);
+      }
+
+      mapInstance.setView(currentMap.center, 13);
+
+      // clear existing markers
+      if(window._markers){ window._markers.forEach(m=>m.remove()); }
+      window._markers = [];
+
+      currentMap.poi.forEach(p => {
+        const marker = L.marker(p.coords).addTo(mapInstance).bindPopup(`<b>${p.name}</b><br>${p.type}<br><small>${p.note||''}</small>`);
+        window._markers.push(marker);
+      });
+
+      // list rendering
+      poiList.innerHTML = `<strong>Luoghi in mappa:</strong>` +
+        '<ul style="margin:6px 0 0 16px">' +
+        currentMap.poi.map(p => `<li>${p.name} — <em>${p.type}</em> <span style="color:#9ab">• ${p.note||''}</span></li>`).join('') +
+        '</ul>';
+    }
+
+    // ==========================
+    //  UNLOCK FLOW
+    // ==========================
+    // Simulazione di sblocco: salviamo in localStorage e (opzionale) inviamo a un endpoint esterno.
+    function saveUnlock(data){
+      const key = `unlock:${currentMap.id}`;
+      localStorage.setItem(key, JSON.stringify({ ...data, ts: Date.now() }));
+    }
+
+    async function submitUnlock(data){
+      if(!SUBMIT_ENDPOINT) return { ok: true };
+      try{
+        const res = await fetch(SUBMIT_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        return { ok: res.ok };
+      }catch(e){ return { ok: false } }
+    }
+
+    unlockForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        mapId: currentMap?.id,
+        email: document.getElementById('email').value.trim(),
+        nights: document.getElementById('nights').value,
+        interests: Array.from(document.getElementById('interests').selectedOptions).map(o=>o.value),
+        notes: document.getElementById('notes').value.trim()
+      };
+
+      saveUnlock(payload);
+      await submitUnlock(payload);
+      // Dopo lo sblocco mostriamo la mappa (già visibile): qui potresti nascondere il form
+      unlockForm.classList.add('hidden');
+    });
+
+    // Skip: permette di vedere subito la mappa senza compilare (utile per validazione a basso attrito)
+    btnSkip.addEventListener('click', () => {
+      saveUnlock({ mapId: currentMap?.id, skipped: true });
+      unlockForm.classList.add('hidden');
+    });
+
+    // Reset scelte per nuova sessione
+    document.getElementById('btnReset').addEventListener('click', () => {
+      Object.keys(localStorage).filter(k=>k.startsWith('unlock:')).forEach(k=>localStorage.removeItem(k));
+      unlockForm.classList.remove('hidden');
+      alert('Scelte di sblocco azzerate.');
+    });
+
+    // Deep link: ?map=mi-foodie
+    function getQueryParam(name){
+      return new URLSearchParams(location.search).get(name)
+    }
+
+    (function init(){
+      renderCards();
+      const q = getQueryParam('map');
+      if(q){ openModal(q); }
+    })();
+  </script>
+</body>
+</html>
