@@ -16,7 +16,7 @@
 
   <!-- Minimal CSS (utility-style) -->
   <style>
-    :root { --bg: #0b0d12; --card:#141821; --muted:#9aa3b2; --text:#e6e9ef; --accent:#7dd3fc; --accent2:#86efac; }
+    :root { --bg:#ffffff; --card:#f7f7fb; --muted:#5b6171; --text:#1b1b1f; --accent:#7b6df0; --accent2:#a78bfa; --border:#e5e7f2; }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial}
@@ -66,17 +66,22 @@
 <body>
   <div class="container">
     <header class="header">
-      <div class="logo">🌍 <strong>Locals</strong> — mappe umane</div>
-      <div class="badge">MVP di validazione • no login • dati fittizi</div>
+      <div class="logo"><img src="logo.png" alt="Locals" style="height:36px;vertical-align:middle"/></div>
+      <div class="badge">MVP di validazione • contenuti fittizi</div>
     </header>
 
     <section class="hero">
       <div>
-        <h1>Scegli una mappa curata da un Local</h1>
-        <p>Ogni mappa è una selezione ragionata di luoghi e micro‑esperienze. Sblocca una mappa per visualizzare tutti i punti.</p>
+        <h1>Seleziona la città e sblocca una mappa curata</h1>
+        <p>Mappe personali create da Local: selezioni ragionate di luoghi e micro‑esperienze.</p>
       </div>
-      <div>
-        <button id="btnReset" class="btn btn-ghost">Reset scelte</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <label for="citySelect" style="margin:0;color:var(--muted);font-size:14px">Città</label>
+        <select id="citySelect" class="btn" style="padding:8px 10px">
+          <option value="Milano" selected>Milano</option>
+          <option value="Roma">Roma</option>
+        </select>
+        <button id="btnReset" class="btn btn-ghost">Reset</button>
       </div>
     </section>
 
@@ -131,9 +136,7 @@
       </div>
     </div>
 
-    <footer class="footer">
-      <p>Questo è un prototipo di validazione: contenuti, profili e luoghi possono essere incompleti o fittizi.</p>
-    </footer>
+    <footer class="footer"><p>© Locals – prototipo di validazione.</p></footer>
   </div>
 
   <!-- Leaflet JS -->
@@ -149,52 +152,130 @@
     // ==========================
     // Aggiungi/rimuovi mappe qui sotto: ogni mappa ha un autore fittizio, interessi e POI.
     const MAPS = [
-      {
-        id: "mi-foodie",
-        city: "Milano",
-        title: "Milano Foodie & Design",
-        author: { name: "Giulia R.", tagline: "Product designer & panettone snob", avatar: "G" },
-        interests: ["Foodie", "Design", "Caffè di quartiere"],
-        priceHint: "€7 (validazione)",
-        center: [45.463, 9.189],
-        poi: [
-          { name: "Trippa", type: "Ristorante", coords: [45.4508, 9.2054], note: "Osteria contemporanea, prenota prima." },
-          { name: "Bar Luce", type: "Caffè", coords: [45.4516, 9.1796], note: "Estetica Wes Anderson dentro la Fondazione Prada." },
-          { name: "Pavé", type: "Bakery", coords: [45.4773, 9.2058], note: "Croissant e torte — ottimo per colazione." },
-          { name: "NoLo walk", type: "Passeggiata", coords: [45.4970, 9.2185], note: "Mercati etnici e bar di quartiere." }
-        ]
-      },
-      {
-        id: "na-art-night",
-        city: "Napoli",
-        title: "Napoli Arte & Nightlife",
-        author: { name: "Marco C.", tagline: "Storico dell'arte di giorno, DJ di notte", avatar: "M" },
-        interests: ["Arte & cultura", "Nightlife", "Street food"],
-        priceHint: "€6 (validazione)",
-        center: [40.8518, 14.2681],
-        poi: [
-          { name: "Museo MADRE", type: "Museo", coords: [40.8537, 14.2610], note: "Contemporanea in un palazzo storico." },
-          { name: "Spaccanapoli", type: "Itinerario", coords: [40.8496, 14.2597], note: "Cardine della città antica." },
-          { name: "Pizzeria 50 Kalò", type: "Pizzeria", coords: [40.8294, 14.2199], note: "Impasti leggendari." },
-          { name: "Lido Notturno", type: "Club", coords: [40.8175, 14.2258], note: "Serate estive sul mare (stagionale)." }
-        ]
-      },
-      {
-        id: "rm-classic-hidden",
-        city: "Roma",
-        title: "Roma Classici & Nascosti",
-        author: { name: "Sara P.", tagline: "Archivista con ossessione per i cortili romani", avatar: "S" },
-        interests: ["Storia", "Fotografia", "Giardini"],
-        priceHint: "€8 (validazione)",
-        center: [41.9028, 12.4964],
-        poi: [
-          { name: "Gianicolo belvedere", type: "Panorama", coords: [41.8925, 12.4612], note: "Tramonto su Roma." },
-          { name: "Coppedè", type: "Quartiere", coords: [41.9197, 12.5116], note: "Architettura fiabesca e dettagli liberty." },
-          { name: "Da Remo", type: "Pizzeria", coords: [41.8809, 12.4768], note: "Stile romano DOC a Testaccio." },
-          { name: "Orto Botanico", type: "Giardino", coords: [41.8938, 12.4660], note: "Oasi verde a Trastevere." }
-        ]
-      }
-    ];
+  // MILANO — 3 profili
+  {
+    id:"mi-foodie-design",
+    city:"Milano",
+    title:"Milano Foodie & Design",
+    author:{name:"Giulia R.",tagline:"Product designer e pasticcerie d'autore",avatar:"G"},
+    interests:["Foodie","Design","Caffè di quartiere"],
+    center:[45.463,9.189],
+    poi:[
+      {name:"Trippa",type:"Ristorante",coords:[45.4508,9.2054],note:"Osteria contemporanea; prenota."},
+      {name:"Bar Luce",type:"Caffè",coords:[45.4516,9.1796],note:"Fondazione Prada."},
+      {name:"Pavé",type:"Bakery",coords:[45.4773,9.2058],note:"Colazioni top."},
+      {name:"10 Corso Como",type:"Concept store",coords:[45.4848,9.1849],note:"Design + bookshop."},
+      {name:"Eutopia",type:"Wine bar",coords:[45.4706,9.2069],note:"Vini naturali."},
+      {name:"Tunnel quartiere Isola",type:"Passeggiata",coords:[45.4897,9.1911],note:"Murales e locali."},
+      {name:"Upcycle",type:"Cafè",coords:[45.4890,9.2276],note:"Brunch nordico."},
+      {name:"Nonostante Marras",type:"Spazio",coords:[45.4746,9.1609],note:"Giardino nascosto."},
+      {name:"Drogheria Milanese",type:"Bistrot",coords:[45.4648,9.1771],note:"Tapas all'italiana."},
+      {name:"Mag Cafè",type:"Cocktail bar",coords:[45.4513,9.1838],note:"Navigli, classici ben fatti."}
+    ]
+  },
+  {
+    id:"mi-tech-alt",
+    city:"Milano",
+    title:"Milano Tech & Alternative Night",
+    author:{name:"Luca T.",tagline:"Dev by day, clubber by night",avatar:"L"},
+    interests:["Nightlife","Musica elettronica","Startups"],
+    center:[45.463,9.189],
+    poi:[
+      {name:"Base Milano",type:"Cultural hub",coords:[45.4517,9.1702],note:"Eventi, talks, musica."},
+      {name:"Tempio del Futuro Perduto",type:"Spazio",coords:[45.4899,9.1802],note:"Underground art/community."},
+      {name:"Tunnel Club",type:"Club",coords:[45.4868,9.2018],note:"Elettronica."},
+      {name:"Jazz Cafè Brera",type:"Bar",coords:[45.4725,9.1870],note:"Aperitivo e djset."},
+      {name:"Talent Garden Calabiana",type:"Coworking",coords:[45.4479,9.2051],note:"Ecosistema startup."},
+      {name:"Le Biciclette",type:"Bar",coords:[45.4616,9.1865],note:"Arte e cocktail."},
+      {name:"NoLo",type:"Quartiere",coords:[45.4970,9.2185],note:"Bar di comunità."},
+      {name:"Polpetta",type:"Street food",coords:[45.4777,9.2006],note:"Tappa veloce."},
+      {name:"FAQ Milano",type:"Club",coords:[45.4653,9.1910],note:"Serate queer"},
+      {name:"Piccolo Teatro Studio",type:"Teatro",coords:[45.4697,9.1869],note:"Programmazione indipendente."}
+    ]
+  },
+  {
+    id:"mi-green-family",
+    city:"Milano",
+    title:"Milano Verde & Family Friendly",
+    author:{name:"Chiara B.",tagline:"Mamma trek e merende nei parchi",avatar:"C"},
+    interests:["Parchi","Bambini","Passeggiate"],
+    center:[45.463,9.189],
+    poi:[
+      {name:"Parco Sempione",type:"Parco",coords:[45.4720,9.1720],note:"Area giochi e laghetto."},
+      {name:"Cascina Cuccagna",type:"Cascina urbana",coords:[45.4511,9.2085],note:"Orto, bistrò, laboratori."},
+      {name:"Biblioteca degli Alberi",type:"Parco",coords:[45.4855,9.1900],note:"Percorsi e installazioni."},
+      {name:"Museo Scienza e Tecnologia",type:"Museo",coords:[45.4628,9.1704],note:"Sezione kids."},
+      {name:"Gelateria Pavé",type:"Gelato",coords:[45.4775,9.2060],note:"Gusto brioche!"},
+      {name:"Naviglio Martesana",type:"Percorso",coords:[45.5054,9.2240],note:"Ciclabile facile."},
+      {name:"Ortica",type:"Quartiere",coords:[45.4874,9.2476],note:"Murales diffusi."},
+      {name:"Triennale Giardino",type:"Giardino",coords:[45.4729,9.1714],note:"Mostre + prato."},
+      {name:"Rossopomodoro Labs",type:"Pizzeria",coords:[45.4825,9.2215],note:"Kids friendly."},
+      {name:"Wow Spazio Fumetto",type:"Museo",coords:[45.4620,9.2286],note:"Laboratori bimbi."}
+    ]
+  },
+
+  // ROMA — 3 profili
+  {
+    id:"rm-classici-nascosti",
+    city:"Roma",
+    title:"Roma Classici & Nascosti",
+    author:{name:"Sara P.",tagline:"Archivista e cortili segreti",avatar:"S"},
+    interests:["Storia","Fotografia","Giardini"],
+    center:[41.9028,12.4964],
+    poi:[
+      {name:"Gianicolo",type:"Panorama",coords:[41.8925,12.4612],note:"Tramonto."},
+      {name:"Coppedè",type:"Quartiere",coords:[41.9197,12.5116],note:"Liberty fiabesco."},
+      {name:"Da Remo",type:"Pizzeria",coords:[41.8809,12.4768],note:"Stile romano."},
+      {name:"Orto Botanico",type:"Giardino",coords:[41.8938,12.4660],note:"Trastevere."},
+      {name:"Mercato Testaccio",type:"Mercato",coords:[41.8778,12.4763],note:"Street food locale."},
+      {name:"Via Margutta",type:"Strada",coords:[41.9074,12.4798],note:"Gallerie e cortili."},
+      {name:"Villa Torlonia",type:"Parco",coords:[41.9142,12.5112],note:"Casina delle Civette."},
+      {name:"Sant'Eustachio",type:"Caffè",coords:[41.8996,12.4761],note:"Caffè storico."},
+      {name:"Fori Imperiali alba",type:"Passeggiata",coords:[41.8923,12.4853],note:"Poca folla."},
+      {name:"Giardino degli Aranci",type:"Panorama",coords:[41.8817,12.4792],note:"Aventino."}
+    ]
+  },
+  {
+    id:"rm-streetfood-night",
+    city:"Roma",
+    title:"Roma Street Food & Nightlife",
+    author:{name:"Davide A.",tagline:"Food trucker e nottambulo",avatar:"D"},
+    interests:["Street food","Nightlife","Birre artigianali"],
+    center:[41.9028,12.4964],
+    poi:[
+      {name:"Trapizzino Testaccio",type:"Street food",coords:[41.8769,12.4769],note:"Iconico."},
+      {name:"Open Baladin",type:"Birreria",coords:[41.8984,12.4737],note:"Craft beers."},
+      {name:"Freni e Frizioni",type:"Cocktail bar",coords:[41.8922,12.4687],note:"Aperitivo."},
+      {name:"Mercato Centrale",type:"Mercato",coords:[41.9012,12.5016],note:"Varietà."},
+      {name:"Pigneto by night",type:"Quartiere",coords:[41.8895,12.5361],note:"Locali indipendenti."},
+      {name:"Supplizio",type:"Street food",coords:[41.8949,12.4745],note:"Supplì d'autore."},
+      {name:"Drink Kong",type:"Cocktail bar",coords:[41.9000,12.4797],note:"Mixology."},
+      {name:"San Lorenzo",type:"Zona",coords:[41.9009,12.5203],note:"Live e bar studenti."},
+      {name:"Dar Poeta",type:"Pizzeria",coords:[41.8908,12.4687],note:"Trastevere."},
+      {name:"Tiberis d'estate",type:"Area",coords:[41.9251,12.4677],note:"Sponde fiume (stag.)."}
+    ]
+  },
+  {
+    id:"rm-family-green",
+    city:"Roma",
+    title:"Roma Verde & Family",
+    author:{name:"Elena V.",tagline:"Educatrice outdoor e gelati in villa",avatar:"E"},
+    interests:["Parchi","Bambini","Passeggiate"],
+    center:[41.9028,12.4964],
+    poi:[
+      {name:"Villa Borghese",type:"Parco",coords:[41.9142,12.4923],note:"Bici e laghetto."},
+      {name:"Bioparco",type:"Zoo",coords:[41.9192,12.4903],note:"Sezione bimbi."},
+      {name:"Explora",type:"Museo",coords:[41.9147,12.4723],note:"Museo dei bambini."},
+      {name:"Villa Ada",type:"Parco",coords:[41.9362,12.5049],note:"Pic-nic."},
+      {name:"Gelateria La Romana",type:"Gelato",coords:[41.9099,12.4986],note:"Cialde calde."},
+      {name:"Caffarella",type:"Parco",coords:[41.8529,12.5181],note:"Percorsi facili."},
+      {name:"BiblioBar",type:"Chiosco",coords:[41.8988,12.4719],note:"Sul Tevere."},
+      {name:"Casina di Raffaello",type:"Ludoteca",coords:[41.9116,12.4898],note:"Laboratori."},
+      {name:"Parco degli Acquedotti",type:"Parco",coords:[41.8546,12.5624],note:"Tramonti."},
+      {name:"Giardino degli Aranci",type:"Panorama",coords:[41.8817,12.4792],note:"Visto family."}
+    ]
+  }
+];
 
     // Endpoint facoltativo per raccogliere submission (Formspree/Google Apps Script ecc.)
     // Sostituisci con il tuo endpoint o lascia vuoto per usare solo localStorage.
@@ -214,6 +295,22 @@
           <div class="avatar">${map.author.avatar}</div>
           <div>
             <div style="font-weight:700">${map.title} • ${map.city}</div>
+            <div style="font-size:13px;color:#6b7280">${map.author.name} — ${map.author.tagline}</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="chips">${map.interests.map(chipHtml).join('')}</div>
+        </div>
+        <div class="card-footer">
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="previewMap('${map.id}')">Anteprima</button>
+            <button class="btn btn-primary" onclick="openModal('${map.id}')">Sblocca</button>
+          </div>
+        </div>
+      </article>`
+    }</div>
+          <div>
+            <div style="font-weight:700">${map.title} • ${map.city}</div>
             <div style="font-size:13px;color:#9fb3d1">${map.author.name} — ${map.author.tagline}</div>
           </div>
         </div>
@@ -221,7 +318,7 @@
           <div class="chips">${map.interests.map(chipHtml).join('')}</div>
         </div>
         <div class="card-footer">
-          <span style="color:#9ab; font-size:14px">${map.priceHint}</span>
+          
           <div style="display:flex;gap:8px">
             <button class="btn" onclick="previewMap('${map.id}')">Anteprima</button>
             <button class="btn btn-primary" onclick="openModal('${map.id}')">Sblocca</button>
@@ -231,7 +328,9 @@
     }
 
     function renderCards(){
-      cardsEl.innerHTML = MAPS.map(cardHtml).join('');
+      const city = window._selectedCity || 'Milano';
+      const list = MAPS.filter(m=>m.city===city);
+      cardsEl.innerHTML = list.map(cardHtml).join('');
     }
 
     // ==========================
@@ -355,7 +454,8 @@
     (function init(){
       renderCards();
       const q = getQueryParam('map');
-      if(q){ openModal(q); }
+      if(q){ const m = MAPS.find(x=>x.id===q); if(m){ window._selectedCity = m.city; document.getElementById('citySelect').value = m.city; openModal(q); }}
+      document.getElementById('citySelect').addEventListener('change', (e)=>{ window._selectedCity = e.target.value; renderCards(); });
     })();
   </script>
 </body>
