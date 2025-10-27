@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Locals – Mappe umane (MVP di validazione)</title>
-  <meta name="description" content="Scegli una mappa curata da un Local fittizio, sblocca e visualizza i luoghi consigliati per il tuo pernottamento." />
+  <meta name="description" content="Sblocca mappe curate da Local fittizi per Milano e Roma: luoghi consigliati e micro-esperienze.">
 
   <!-- Leaflet CSS -->
   <link
@@ -14,64 +14,65 @@
     crossorigin=""
   />
 
-  <!-- Minimal CSS (utility-style) -->
   <style>
-    :root { --bg:#ffffff; --card:#f7f7fb; --muted:#5b6171; --text:#1b1b1f; --accent:#7b6df0; --accent2:#a78bfa; --border:#e5e7f2; }
+    /* Palette coerente col logo (lilla) */
+    :root{
+      --bg:#ffffff; --text:#16171a; --muted:#5e6676;
+      --card:#f8f8fd; --border:#e7e9f4;
+      --accent:#7b6df0; --accent2:#a78bfa; /* lilla */
+      --ink:#0e1220;
+    }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
     a{color:var(--accent)}
-    .container{max-width:1100px;margin:0 auto;padding:24px}
+    .container{max-width:1120px;margin:0 auto;padding:24px}
+
+    /* Header */
     .header{display:flex;justify-content:space-between;align-items:center;gap:16px}
-    .logo{font-weight:700;letter-spacing:.3px}
-    .badge{border:1px solid #2a3040;padding:4px 8px;border-radius:999px;color:var(--muted);font-size:12px}
+    .badge{border:1px solid var(--border);padding:4px 10px;border-radius:999px;color:var(--muted);font-size:12px;background:#fff}
+    .hero{margin:14px 0 24px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .hero h1{margin:0;font-size:28px}
+    .hero p{margin:4px 0;color:var(--muted)}
+
+    /* Grid e card */
+    .section-title{margin:18px 0 8px;font-size:22px}
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
     @media (max-width:960px){.grid{grid-template-columns:repeat(2,1fr)}}
     @media (max-width:640px){.grid{grid-template-columns:1fr}}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid #222838;border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
-    .card-head{padding:16px;border-bottom:1px solid #1a1f2b;display:flex;align-items:center;gap:12px}
-    .avatar{width:40px;height:40px;border-radius:999px;background:#222;display:grid;place-items:center;font-weight:700}
-    .pill{font-size:12px;color:#bcd; background:#1a2232;border:1px solid #283149;border-radius:999px;padding:4px 8px;margin-right:6px;white-space:nowrap}
+    .card{background:linear-gradient(180deg,rgba(123,109,240,.06),rgba(123,109,240,.02));border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+    .card-head{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+    .avatar{width:40px;height:40px;border-radius:999px;background:#ecebff;display:grid;place-items:center;font-weight:700;color:#5a53c2}
     .card-body{padding:16px;flex:1}
-    .card-footer{padding:16px;border-top:1px solid #1a1f2b;display:flex;justify-content:space-between;align-items:center}
-    .btn{background:#1b2335;color:#eaf2ff;border:1px solid #2a3550;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
-    .btn:hover{filter:brightness(1.1)}
-    .btn-primary{background:linear-gradient(90deg,var(--accent),#60a5fa);color:#06213a;border:none}
-    .btn-ghost{background:transparent;border:1px solid #2a2f40;color:#cbd5e1}
+    .chips{display:flex;flex-wrap:wrap;gap:6px}
+    .pill{font-size:12px;padding:6px 10px;border-radius:999px;background:#f0efff;border:1px solid #e3e1ff;color:#3c3a6a}
+    .card-footer{padding:16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;align-items:center;gap:8px}
 
-    .hero{margin:12px 0 24px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
-    .hero h1{margin:0;font-size:28px}
-    .hero p{margin:4px 0;color:var(--muted)}
-    /* toggle città */
-    .city-toggle{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .city-btn{border:1px solid var(--border);background:#1b2335;color:#eaf2ff;padding:8px 14px;border-radius:999px;cursor:pointer}
-    .city-btn.active{background:linear-gradient(90deg,var(--accent),#60a5fa);color:#0b1020;border-color:transparent;font-weight:700}
-
+    /* Buttons */
+    .btn{background:#191f33;color:#eef3ff;border:1px solid #283457;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
+    .btn:hover{filter:brightness(1.06)}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),#60a5fa);color:#0e1220;border:none}
+    .btn-ghost{background:#fff;border:1px solid var(--border);color:#2b3040}
 
     /* Modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center;padding:16px;z-index:50}
-    .modal{width:min(780px,100%);background:var(--card);border:1px solid #22293a;border-radius:18px;overflow:hidden}
-    .modal-head{padding:16px 18px;border-bottom:1px solid #1d2332;display:flex;justify-content:space-between;align-items:center}
-    .modal-body{display:grid;grid-template-columns:380px 1fr}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.60);display:none;place-items:center;padding:16px;z-index:50}
+    .modal{width:min(880px,100%);background:#fff;border:1px solid var(--border);border-radius:18px;overflow:hidden}
+    .modal-head{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+    .modal-body{display:grid;grid-template-columns:360px 1fr}
     @media (max-width:900px){.modal-body{grid-template-columns:1fr}}
-    .modal-left{padding:16px;border-right:1px solid #1d2332}
+    .modal-left{padding:16px;border-right:1px solid var(--border)}
     .modal-right{padding:16px}
-    label{display:block;font-size:13px;color:#b7c0cf;margin:10px 0 6px}
-    input, select, textarea{width:100%;background:#121724;border:1px solid #273047;color:#e6ecf7;border-radius:10px;padding:10px}
-
-    #map{height:520px;border-radius:12px;border:1px solid #22293a}
-
-    .chips{display:flex;flex-wrap:wrap;gap:6px}
-    .chip{font-size:12px;padding:6px 10px;border-radius:999px;background:#172033;border:1px solid #22304a;color:#d9e3f2}
-
-    .footer{margin-top:28px;color:#93a0b5;font-size:13px}
+    label{display:block;font-size:13px;color:#586075;margin:10px 0 6px}
+    input, select, textarea{width:100%;background:#fbfbfe;border:1px solid var(--border);color:var(--ink);border-radius:10px;padding:10px}
+    #map{height:520px;border-radius:12px;border:1px solid var(--border)}
+    .footer{margin-top:28px;color:#8a93a8;font-size:13px}
     .hidden{display:none !important}
   </style>
 </head>
 <body>
   <div class="container">
     <header class="header">
-      <div class="logo"><img src="logo.png" alt="Locals" style="height:36px;vertical-align:middle"/></div>
+      <div class="logo"><img src="logo.png" alt="Locals" style="height:36px;vertical-align:middle"></div>
       <div class="badge">MVP di validazione • contenuti fittizi</div>
     </header>
 
@@ -83,23 +84,23 @@
       <div></div>
     </section>
 
-    <!-- Cards elenco Local -->
-    <section id="cards" class="grid"></section>
+    <!-- Qui stampiamo Milano e Roma come due blocchi separati -->
+    <section id="cards"></section>
 
-    <!-- Modal: Unlock & Map -->
+    <!-- Modal -->
     <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true">
       <div class="modal">
         <div class="modal-head">
           <div>
             <div id="modalTitle" style="font-weight:700"></div>
-            <div id="modalSubtitle" style="font-size:13px;color:#9fb3d1"></div>
+            <div id="modalSubtitle" style="font-size:13px;color:#6a6f82"></div>
           </div>
           <button id="modalClose" class="btn">Chiudi</button>
         </div>
         <div class="modal-body">
           <div class="modal-left">
             <form id="unlockForm">
-              <p style="margin:0 0 8px;color:#b4c2d8">Per sbloccare la mappa compila questi campi (validazione):</p>
+              <p style="margin:0 0 8px;color:#6a6f82">Per sbloccare la mappa compila questi campi (validazione):</p>
               <label for="email">Email</label>
               <input id="email" type="email" required placeholder="nome@email.com" />
 
@@ -123,12 +124,12 @@
                 <button class="btn btn-primary" type="submit">Sblocca mappa</button>
                 <button class="btn" type="button" id="btnSkip">Salta</button>
               </div>
-              <p style="color:#8fa0ba;font-size:12px;margin-top:8px">Compilando ci aiuti a validare il prodotto. I dati restano interni alla sperimentazione.</p>
+              <p style="color:#7a8096;font-size:12px;margin-top:8px">I dati sono usati solo per la validazione MVP.</p>
             </form>
           </div>
           <div class="modal-right">
             <div id="map"></div>
-            <div id="poiList" style="margin-top:10px;color:#c8d3e5;font-size:14px"></div>
+            <div id="poiList" style="margin-top:10px;color:#2b3040;font-size:14px"></div>
           </div>
         </div>
       </div>
@@ -145,143 +146,137 @@
   ></script>
 
   <script>
-    // ==========================
-    //  CONFIGURAZIONE DATI MVP
-    // ==========================
-    // Aggiungi/rimuovi mappe qui sotto: ogni mappa ha un autore fittizio, interessi e POI.
-    const MAPS = [
-  // MILANO — 3 profili
-  {
-    id:"mi-foodie-design",
-    city:"Milano",
-    title:"Milano Foodie & Design",
-    author:{name:"Giulia R.",tagline:"Product designer e pasticcerie d'autore",avatar:"G"},
-    interests:["Foodie","Design","Caffè di quartiere"],
-    center:[45.463,9.189],
-    poi:[
-      {name:"Trippa",type:"Ristorante",coords:[45.4508,9.2054],note:"Osteria contemporanea; prenota."},
-      {name:"Bar Luce",type:"Caffè",coords:[45.4516,9.1796],note:"Fondazione Prada."},
-      {name:"Pavé",type:"Bakery",coords:[45.4773,9.2058],note:"Colazioni top."},
-      {name:"10 Corso Como",type:"Concept store",coords:[45.4848,9.1849],note:"Design + bookshop."},
-      {name:"Eutopia",type:"Wine bar",coords:[45.4706,9.2069],note:"Vini naturali."},
-      {name:"Tunnel quartiere Isola",type:"Passeggiata",coords:[45.4897,9.1911],note:"Murales e locali."},
-      {name:"Upcycle",type:"Cafè",coords:[45.4890,9.2276],note:"Brunch nordico."},
-      {name:"Nonostante Marras",type:"Spazio",coords:[45.4746,9.1609],note:"Giardino nascosto."},
-      {name:"Drogheria Milanese",type:"Bistrot",coords:[45.4648,9.1771],note:"Tapas all'italiana."},
-      {name:"Mag Cafè",type:"Cocktail bar",coords:[45.4513,9.1838],note:"Navigli, classici ben fatti."}
-    ]
-  },
-  {
-    id:"mi-tech-alt",
-    city:"Milano",
-    title:"Milano Tech & Alternative Night",
-    author:{name:"Luca T.",tagline:"Dev by day, clubber by night",avatar:"L"},
-    interests:["Nightlife","Musica elettronica","Startups"],
-    center:[45.463,9.189],
-    poi:[
-      {name:"Base Milano",type:"Cultural hub",coords:[45.4517,9.1702],note:"Eventi, talks, musica."},
-      {name:"Tempio del Futuro Perduto",type:"Spazio",coords:[45.4899,9.1802],note:"Underground art/community."},
-      {name:"Tunnel Club",type:"Club",coords:[45.4868,9.2018],note:"Elettronica."},
-      {name:"Jazz Cafè Brera",type:"Bar",coords:[45.4725,9.1870],note:"Aperitivo e djset."},
-      {name:"Talent Garden Calabiana",type:"Coworking",coords:[45.4479,9.2051],note:"Ecosistema startup."},
-      {name:"Le Biciclette",type:"Bar",coords:[45.4616,9.1865],note:"Arte e cocktail."},
-      {name:"NoLo",type:"Quartiere",coords:[45.4970,9.2185],note:"Bar di comunità."},
-      {name:"Polpetta",type:"Street food",coords:[45.4777,9.2006],note:"Tappa veloce."},
-      {name:"FAQ Milano",type:"Club",coords:[45.4653,9.1910],note:"Serate queer"},
-      {name:"Piccolo Teatro Studio",type:"Teatro",coords:[45.4697,9.1869],note:"Programmazione indipendente."}
-    ]
-  },
-  {
-    id:"mi-green-family",
-    city:"Milano",
-    title:"Milano Verde & Family Friendly",
-    author:{name:"Chiara B.",tagline:"Mamma trek e merende nei parchi",avatar:"C"},
-    interests:["Parchi","Bambini","Passeggiate"],
-    center:[45.463,9.189],
-    poi:[
-      {name:"Parco Sempione",type:"Parco",coords:[45.4720,9.1720],note:"Area giochi e laghetto."},
-      {name:"Cascina Cuccagna",type:"Cascina urbana",coords:[45.4511,9.2085],note:"Orto, bistrò, laboratori."},
-      {name:"Biblioteca degli Alberi",type:"Parco",coords:[45.4855,9.1900],note:"Percorsi e installazioni."},
-      {name:"Museo Scienza e Tecnologia",type:"Museo",coords:[45.4628,9.1704],note:"Sezione kids."},
-      {name:"Gelateria Pavé",type:"Gelato",coords:[45.4775,9.2060],note:"Gusto brioche!"},
-      {name:"Naviglio Martesana",type:"Percorso",coords:[45.5054,9.2240],note:"Ciclabile facile."},
-      {name:"Ortica",type:"Quartiere",coords:[45.4874,9.2476],note:"Murales diffusi."},
-      {name:"Triennale Giardino",type:"Giardino",coords:[45.4729,9.1714],note:"Mostre + prato."},
-      {name:"Rossopomodoro Labs",type:"Pizzeria",coords:[45.4825,9.2215],note:"Kids friendly."},
-      {name:"Wow Spazio Fumetto",type:"Museo",coords:[45.4620,9.2286],note:"Laboratori bimbi."}
-    ]
-  },
-
-  // ROMA — 3 profili
-  {
-    id:"rm-classici-nascosti",
-    city:"Roma",
-    title:"Roma Classici & Nascosti",
-    author:{name:"Sara P.",tagline:"Archivista e cortili segreti",avatar:"S"},
-    interests:["Storia","Fotografia","Giardini"],
-    center:[41.9028,12.4964],
-    poi:[
-      {name:"Gianicolo",type:"Panorama",coords:[41.8925,12.4612],note:"Tramonto."},
-      {name:"Coppedè",type:"Quartiere",coords:[41.9197,12.5116],note:"Liberty fiabesco."},
-      {name:"Da Remo",type:"Pizzeria",coords:[41.8809,12.4768],note:"Stile romano."},
-      {name:"Orto Botanico",type:"Giardino",coords:[41.8938,12.4660],note:"Trastevere."},
-      {name:"Mercato Testaccio",type:"Mercato",coords:[41.8778,12.4763],note:"Street food locale."},
-      {name:"Via Margutta",type:"Strada",coords:[41.9074,12.4798],note:"Gallerie e cortili."},
-      {name:"Villa Torlonia",type:"Parco",coords:[41.9142,12.5112],note:"Casina delle Civette."},
-      {name:"Sant'Eustachio",type:"Caffè",coords:[41.8996,12.4761],note:"Caffè storico."},
-      {name:"Fori Imperiali alba",type:"Passeggiata",coords:[41.8923,12.4853],note:"Poca folla."},
-      {name:"Giardino degli Aranci",type:"Panorama",coords:[41.8817,12.4792],note:"Aventino."}
-    ]
-  },
-  {
-    id:"rm-streetfood-night",
-    city:"Roma",
-    title:"Roma Street Food & Nightlife",
-    author:{name:"Davide A.",tagline:"Food trucker e nottambulo",avatar:"D"},
-    interests:["Street food","Nightlife","Birre artigianali"],
-    center:[41.9028,12.4964],
-    poi:[
-      {name:"Trapizzino Testaccio",type:"Street food",coords:[41.8769,12.4769],note:"Iconico."},
-      {name:"Open Baladin",type:"Birreria",coords:[41.8984,12.4737],note:"Craft beers."},
-      {name:"Freni e Frizioni",type:"Cocktail bar",coords:[41.8922,12.4687],note:"Aperitivo."},
-      {name:"Mercato Centrale",type:"Mercato",coords:[41.9012,12.5016],note:"Varietà."},
-      {name:"Pigneto by night",type:"Quartiere",coords:[41.8895,12.5361],note:"Locali indipendenti."},
-      {name:"Supplizio",type:"Street food",coords:[41.8949,12.4745],note:"Supplì d'autore."},
-      {name:"Drink Kong",type:"Cocktail bar",coords:[41.9000,12.4797],note:"Mixology."},
-      {name:"San Lorenzo",type:"Zona",coords:[41.9009,12.5203],note:"Live e bar studenti."},
-      {name:"Dar Poeta",type:"Pizzeria",coords:[41.8908,12.4687],note:"Trastevere."},
-      {name:"Tiberis d'estate",type:"Area",coords:[41.9251,12.4677],note:"Sponde fiume (stag.)."}
-    ]
-  },
-  {
-    id:"rm-family-green",
-    city:"Roma",
-    title:"Roma Verde & Family",
-    author:{name:"Elena V.",tagline:"Educatrice outdoor e gelati in villa",avatar:"E"},
-    interests:["Parchi","Bambini","Passeggiate"],
-    center:[41.9028,12.4964],
-    poi:[
-      {name:"Villa Borghese",type:"Parco",coords:[41.9142,12.4923],note:"Bici e laghetto."},
-      {name:"Bioparco",type:"Zoo",coords:[41.9192,12.4903],note:"Sezione bimbi."},
-      {name:"Explora",type:"Museo",coords:[41.9147,12.4723],note:"Museo dei bambini."},
-      {name:"Villa Ada",type:"Parco",coords:[41.9362,12.5049],note:"Pic-nic."},
-      {name:"Gelateria La Romana",type:"Gelato",coords:[41.9099,12.4986],note:"Cialde calde."},
-      {name:"Caffarella",type:"Parco",coords:[41.8529,12.5181],note:"Percorsi facili."},
-      {name:"BiblioBar",type:"Chiosco",coords:[41.8988,12.4719],note:"Sul Tevere."},
-      {name:"Casina di Raffaello",type:"Ludoteca",coords:[41.9116,12.4898],note:"Laboratori."},
-      {name:"Parco degli Acquedotti",type:"Parco",coords:[41.8546,12.5624],note:"Tramonti."},
-      {name:"Giardino degli Aranci",type:"Panorama",coords:[41.8817,12.4792],note:"Visto family."}
-    ]
-  }
-];
-
-    // Endpoint facoltativo per raccogliere submission (Formspree/Google Apps Script ecc.)
-    // Sostituisci con il tuo endpoint o lascia vuoto per usare solo localStorage.
+    // ========= CONFIG DATI =========
+    // Sostituisci con il tuo endpoint se vuoi tracciare gli sblocchi (Formspree/Apps Script)
     const SUBMIT_ENDPOINT = ""; // es. "https://formspree.io/f/xxxxxxx"
 
-    // ==========================
-    //  RENDER CARDS
-    // ==========================
+    const MAPS = [
+      // MILANO — 3 profili
+      {
+        id:"mi-foodie-design",
+        city:"Milano",
+        title:"Milano Foodie & Design",
+        author:{name:"Giulia R.",tagline:"Product designer e pasticcerie d'autore",avatar:"G"},
+        interests:["Foodie","Design","Caffè di quartiere"],
+        center:[45.463,9.189],
+        poi:[
+          {name:"Trippa",type:"Ristorante",coords:[45.4508,9.2054],note:"Osteria contemporanea; prenota."},
+          {name:"Bar Luce",type:"Caffè",coords:[45.4516,9.1796],note:"Fondazione Prada."},
+          {name:"Pavé",type:"Bakery",coords:[45.4773,9.2058],note:"Colazioni top."},
+          {name:"10 Corso Como",type:"Concept store",coords:[45.4848,9.1849],note:"Design + bookshop."},
+          {name:"Eutopia",type:"Wine bar",coords:[45.4706,9.2069],note:"Vini naturali."},
+          {name:"Isola murales",type:"Passeggiata",coords:[45.4897,9.1911],note:"Street art e locali."},
+          {name:"Upcycle",type:"Cafè",coords:[45.4890,9.2276],note:"Brunch nordico."},
+          {name:"Nonostante Marras",type:"Spazio",coords:[45.4746,9.1609],note:"Giardino nascosto."},
+          {name:"Drogheria Milanese",type:"Bistrot",coords:[45.4648,9.1771],note:"Tapas all'italiana."},
+          {name:"Mag Cafè",type:"Cocktail bar",coords:[45.4513,9.1838],note:"Classici ben fatti."}
+        ]
+      },
+      {
+        id:"mi-tech-alt",
+        city:"Milano",
+        title:"Milano Tech & Alternative Night",
+        author:{name:"Luca T.",tagline:"Dev by day, clubber by night",avatar:"L"},
+        interests:["Nightlife","Musica elettronica","Startups"],
+        center:[45.463,9.189],
+        poi:[
+          {name:"BASE Milano",type:"Cultural hub",coords:[45.4517,9.1702],note:"Eventi, talks, musica."},
+          {name:"Tempio del Futuro Perduto",type:"Spazio",coords:[45.4899,9.1802],note:"Underground/community."},
+          {name:"Tunnel Club",type:"Club",coords:[45.4868,9.2018],note:"Elettronica."},
+          {name:"Le Biciclette",type:"Bar",coords:[45.4616,9.1865],note:"Arte e cocktail."},
+          {name:"Talent Garden Calabiana",type:"Coworking",coords:[45.4479,9.2051],note:"Ecosistema startup."},
+          {name:"NoLo",type:"Quartiere",coords:[45.4970,9.2185],note:"Bar di comunità."},
+          {name:"Polpetta",type:"Street food",coords:[45.4777,9.2006],note:"Tappa veloce."},
+          {name:"FAQ Milano",type:"Club",coords:[45.4653,9.1910],note:"Serate queer."},
+          {name:"Piccolo Teatro Studio",type:"Teatro",coords:[45.4697,9.1869],note:"Programmazione indipendente."},
+          {name:"Spirit de Milan",type:"Club",coords:[45.5185,9.1408],note:"Swing/serate a tema."}
+        ]
+      },
+      {
+        id:"mi-green-family",
+        city:"Milano",
+        title:"Milano Verde & Family Friendly",
+        author:{name:"Chiara B.",tagline:"Mamma trek e merende nei parchi",avatar:"C"},
+        interests:["Parchi","Bambini","Passeggiate"],
+        center:[45.463,9.189],
+        poi:[
+          {name:"Parco Sempione",type:"Parco",coords:[45.4720,9.1720],note:"Area giochi e laghetto."},
+          {name:"Cascina Cuccagna",type:"Cascina urbana",coords:[45.4511,9.2085],note:"Orto, bistrò, laboratori."},
+          {name:"Biblioteca degli Alberi",type:"Parco",coords:[45.4855,9.1900],note:"Percorsi e installazioni."},
+          {name:"Museo Scienza e Tecnologia",type:"Museo",coords:[45.4628,9.1704],note:"Sezione kids."},
+          {name:"Gelateria Pavé",type:"Gelato",coords:[45.4775,9.2060],note:"Gusto brioche!"},
+          {name:"Naviglio Martesana",type:"Percorso",coords:[45.5054,9.2240],note:"Ciclabile facile."},
+          {name:"Ortica",type:"Quartiere",coords:[45.4874,9.2476],note:"Murales diffusi."},
+          {name:"Triennale Giardino",type:"Giardino",coords:[45.4729,9.1714],note:"Mostre + prato."},
+          {name:"Rossopomodoro Labs",type:"Pizzeria",coords:[45.4825,9.2215],note:"Kids friendly."},
+          {name:"WOW Spazio Fumetto",type:"Museo",coords:[45.4620,9.2286],note:"Laboratori bimbi."}
+        ]
+      },
+
+      // ROMA — 3 profili
+      {
+        id:"rm-classici-nascosti",
+        city:"Roma",
+        title:"Roma Classici & Nascosti",
+        author:{name:"Sara P.",tagline:"Archivista e cortili segreti",avatar:"S"},
+        interests:["Storia","Fotografia","Giardini"],
+        center:[41.9028,12.4964],
+        poi:[
+          {name:"Gianicolo",type:"Panorama",coords:[41.8925,12.4612],note:"Tramonto."},
+          {name:"Coppedè",type:"Quartiere",coords:[41.9197,12.5116],note:"Liberty fiabesco."},
+          {name:"Da Remo",type:"Pizzeria",coords:[41.8809,12.4768],note:"Stile romano."},
+          {name:"Orto Botanico",type:"Giardino",coords:[41.8938,12.4660],note:"Trastevere."},
+          {name:"Mercato Testaccio",type:"Mercato",coords:[41.8778,12.4763],note:"Street food locale."},
+          {name:"Via Margutta",type:"Strada",coords:[41.9074,12.4798],note:"Gallerie e cortili."},
+          {name:"Villa Torlonia",type:"Parco",coords:[41.9142,12.5112],note:"Casina delle Civette."},
+          {name:"Sant'Eustachio",type:"Caffè",coords:[41.8996,12.4761],note:"Caffè storico."},
+          {name:"Fori Imperiali (alba)",type:"Passeggiata",coords:[41.8923,12.4853],note:"Poca folla."},
+          {name:"Giardino degli Aranci",type:"Panorama",coords:[41.8817,12.4792],note:"Aventino."}
+        ]
+      },
+      {
+        id:"rm-streetfood-night",
+        city:"Roma",
+        title:"Roma Street Food & Nightlife",
+        author:{name:"Davide A.",tagline:"Food trucker e nottambulo",avatar:"D"},
+        interests:["Street food","Nightlife","Birre artigianali"],
+        center:[41.9028,12.4964],
+        poi:[
+          {name:"Trapizzino Testaccio",type:"Street food",coords:[41.8769,12.4769],note:"Iconico."},
+          {name:"Open Baladin",type:"Birreria",coords:[41.8984,12.4737],note:"Craft beers."},
+          {name:"Freni e Frizioni",type:"Cocktail bar",coords:[41.8922,12.4687],note:"Aperitivo."},
+          {name:"Mercato Centrale",type:"Mercato",coords:[41.9012,12.5016],note:"Varietà."},
+          {name:"Pigneto by night",type:"Quartiere",coords:[41.8895,12.5361],note:"Locali indipendenti."},
+          {name:"Supplizio",type:"Street food",coords:[41.8949,12.4745],note:"Supplì d'autore."},
+          {name:"Drink Kong",type:"Cocktail bar",coords:[41.9000,12.4797],note:"Mixology."},
+          {name:"San Lorenzo",type:"Zona",coords:[41.9009,12.5203],note:"Live e bar studenti."},
+          {name:"Dar Poeta",type:"Pizzeria",coords:[41.8908,12.4687],note:"Trastevere."},
+          {name:"Tiberis d'estate",type:"Area",coords:[41.9251,12.4677],note:"Sponde fiume (stag.)."}
+        ]
+      },
+      {
+        id:"rm-family-green",
+        city:"Roma",
+        title:"Roma Verde & Family",
+        author:{name:"Elena V.",tagline:"Educatrice outdoor e gelati in villa",avatar:"E"},
+        interests:["Parchi","Bambini","Passeggiate"],
+        center:[41.9028,12.4964],
+        poi:[
+          {name:"Villa Borghese",type:"Parco",coords:[41.9142,12.4923],note:"Bici e laghetto."},
+          {name:"Bioparco",type:"Zoo",coords:[41.9192,12.4903],note:"Sezione bimbi."},
+          {name:"Explora",type:"Museo",coords:[41.9147,12.4723],note:"Museo dei bambini."},
+          {name:"Villa Ada",type:"Parco",coords:[41.9362,12.5049],note:"Pic-nic."},
+          {name:"Gelateria La Romana",type:"Gelato",coords:[41.9099,12.4986],note:"Cialde calde."},
+          {name:"Parco della Caffarella",type:"Parco",coords:[41.8529,12.5181],note:"Percorsi facili."},
+          {name:"BiblioBar",type:"Chiosco",coords:[41.8988,12.4719],note:"Sul Tevere."},
+          {name:"Casina di Raffaello",type:"Ludoteca",coords:[41.9116,12.4898],note:"Laboratori."},
+          {name:"Parco degli Acquedotti",type:"Parco",coords:[41.8546,12.5624],note:"Tramonti."},
+          {name:"Giardino degli Aranci",type:"Panorama",coords:[41.8817,12.4792],note:"Visto family."}
+        ]
+      }
+    ];
+
+    // ========= RENDER =========
     const cardsEl = document.getElementById('cards');
 
     function chipHtml(text){ return `<span class="pill">${text}</span>` }
@@ -292,7 +287,7 @@
         <div class="card-head">
           <div class="avatar">${map.author.avatar}</div>
           <div>
-            <div style="font-weight:700">${map.title} • ${map.city}</div>
+            <div style="font-weight:700">${map.title}</div>
             <div style="font-size:13px;color:#6b7280">${map.author.name} — ${map.author.tagline}</div>
           </div>
         </div>
@@ -300,38 +295,31 @@
           <div class="chips">${map.interests.map(chipHtml).join('')}</div>
         </div>
         <div class="card-footer">
-          <div style="display:flex;gap:8px">
-            <button class="btn" onclick="previewMap('${map.id}')">Anteprima</button>
-            <button class="btn btn-primary" onclick="openModal('${map.id}')">Sblocca</button>
-          </div>
+          <button class="btn" onclick="previewMap('${map.id}')">Anteprima</button>
+          <button class="btn btn-primary" onclick="openModal('${map.id}')">Sblocca</button>
         </div>
-      </article>`
+      </article>`;
+    }
+
+    function renderSection(title, list){
+      return `
+        <h2 class="section-title">${title}</h2>
+        <div class="grid">
+          ${list.map(cardHtml).join('')}
+        </div>
+      `;
     }
 
     function renderCards(){
       const milano = MAPS.filter(m => m.city === 'Milano');
       const roma   = MAPS.filter(m => m.city === 'Roma');
-    
-      const sectionHtml = (titolo, items) => `
-        <h2 style="margin:16px 0 8px;font-size:22px">${titolo}</h2>
-        <div class="grid">
-          ${items.map(cardHtml).join('')}
-        </div>
-      `;
-    
-      cardsEl.innerHTML =
-        sectionHtml('Milano', milano) +
-        sectionHtml('Roma', roma);
+      cardsEl.innerHTML = renderSection('Milano', milano) + renderSection('Roma', roma);
     }
 
-
-    // ==========================
-    //  MODAL + MAP LOGIC
-    // ==========================
+    // ========= MODAL + MAP =========
     const modal = document.getElementById('modal');
     const modalTitle = document.getElementById('modalTitle');
     const modalSubtitle = document.getElementById('modalSubtitle');
-    const mapDiv = document.getElementById('map');
     const poiList = document.getElementById('poiList');
     const unlockForm = document.getElementById('unlockForm');
     const btnSkip = document.getElementById('btnSkip');
@@ -351,15 +339,10 @@
     function closeModal(){ modal.style.display = 'none'; }
     document.getElementById('modalClose').addEventListener('click', closeModal);
 
-    function previewMap(mapId){
-      openModal(mapId);
-      // Solo anteprima: non richiediamo form per centrare la mappa e mostrare marker
-      // L'utente può cliccare "Salta" per vedere subito i punti.
-    }
+    function previewMap(mapId){ openModal(mapId); }
 
     function initMap(){
       if(!currentMap) return;
-      // reset list
       poiList.innerHTML = '';
 
       if(!mapInstance){
@@ -372,7 +355,6 @@
 
       mapInstance.setView(currentMap.center, 13);
 
-      // clear existing markers
       if(window._markers){ window._markers.forEach(m=>m.remove()); }
       window._markers = [];
 
@@ -381,17 +363,13 @@
         window._markers.push(marker);
       });
 
-      // list rendering
       poiList.innerHTML = `<strong>Luoghi in mappa:</strong>` +
         '<ul style="margin:6px 0 0 16px">' +
-        currentMap.poi.map(p => `<li>${p.name} — <em>${p.type}</em> <span style="color:#9ab">• ${p.note||''}</span></li>`).join('') +
+        currentMap.poi.map(p => `<li>${p.name} — <em>${p.type}</em> <span style="color:#6a6f82">• ${p.note||''}</span></li>`).join('') +
         '</ul>';
     }
 
-    // ==========================
-    //  UNLOCK FLOW
-    // ==========================
-    // Simulazione di sblocco: salviamo in localStorage e (opzionale) inviamo a un endpoint esterno.
+    // ========= UNLOCK / SUBMIT =========
     function saveUnlock(data){
       const key = `unlock:${currentMap.id}`;
       localStorage.setItem(key, JSON.stringify({ ...data, ts: Date.now() }));
@@ -406,58 +384,38 @@
           body: JSON.stringify(data)
         });
         return { ok: res.ok };
-      }catch(e){ return { ok: false } }
+      }catch(e){ return { ok: false }; }
     }
 
     unlockForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const payload = {
         mapId: currentMap?.id,
+        city: currentMap?.city,
         email: document.getElementById('email').value.trim(),
         nights: document.getElementById('nights').value,
         interests: Array.from(document.getElementById('interests').selectedOptions).map(o=>o.value),
-        notes: document.getElementById('notes').value.trim()
+        notes: document.getElementById('notes').value.trim(),
+        ua: navigator.userAgent
       };
-
       saveUnlock(payload);
       await submitUnlock(payload);
-      // Dopo lo sblocco mostriamo la mappa (già visibile): qui potresti nascondere il form
       unlockForm.classList.add('hidden');
     });
 
-    // Skip: permette di vedere subito la mappa senza compilare (utile per validazione a basso attrito)
     btnSkip.addEventListener('click', () => {
-      saveUnlock({ mapId: currentMap?.id, skipped: true });
+      saveUnlock({ mapId: currentMap?.id, city: currentMap?.city, skipped: true, ua: navigator.userAgent });
       unlockForm.classList.add('hidden');
     });
 
-    // Reset scelte per nuova sessione
-    document.getElementById('btnReset').addEventListener('click', () => {
-      Object.keys(localStorage).filter(k=>k.startsWith('unlock:')).forEach(k=>localStorage.removeItem(k));
-      unlockForm.classList.remove('hidden');
-      alert('Scelte di sblocco azzerate.');
-    });
+    // ========= INIT =========
+    function getQueryParam(name){ return new URLSearchParams(location.search).get(name) }
 
-    // Deep link: ?map=mi-foodie
-    function getQueryParam(name){
-      return new URLSearchParams(location.search).get(name)
-    }
-
-    
     (function init(){
-      // render iniziale: mostra Milano e Roma
       renderCards();
-    
-      // deep link ?map=...
       const q = getQueryParam('map');
-      if(q){
-        const m = MAPS.find(x => x.id === q);
-        if(m){
-          openModal(q);
-        }
-      }
+      if(q){ const m = MAPS.find(x=>x.id===q); if(m){ openModal(q); } }
     })();
-
   </script>
 </body>
 </html>
