@@ -4,424 +4,228 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Locals – Mappe umane (MVP)</title>
-  <meta name="description" content="Sblocca mappe curate da Local fittizi per Milano e Roma: luoghi consigliati su mappa, solo dopo email." />
+  <meta name="description" content="Scopri mappe curate da Local fittizi per Milano e Roma: sblocca la mappa inserendo la tua email.">
 
-  <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
-
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <style>
-    /* ======= Palette ispirata al logo (lilla) ======= */
     :root{
-      --bg:#ffffff; --text:#12131a; --muted:#61667a;
-      --accent:#7b6df0; --accent2:#a78bfa;
-      --card:#f8f8fd; --border:#e7e9f4; --ink:#0f1220;
+      --bg:#ffffff;--text:#16171c;--muted:#5f6474;
+      --accent:#7b6df0;--accent2:#a78bfa;--border:#e7e9f4;
+      --card:#fafaff;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
-    a{color:var(--accent);text-decoration:none}
-    .container{max-width:1140px;margin:0 auto;padding:24px}
+    body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;color:var(--text)}
+    .container{max-width:1100px;margin:auto;padding:24px}
 
-    /* Header / Hero */
-    .header{display:flex;justify-content:space-between;align-items:center;gap:16px}
-    .badge{border:1px solid var(--border);padding:4px 10px;border-radius:999px;color:var(--muted);font-size:12px;background:#fff}
-    .hero{margin:18px 0 28px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-end}
-    .hero h1{margin:0;font-size:34px;letter-spacing:.2px}
-    .hero p{margin:6px 0 0;color:var(--muted);max-width:720px}
+    /* header */
+    .header{display:flex;justify-content:space-between;align-items:center}
+    .badge{border:1px solid var(--border);padding:4px 10px;border-radius:999px;font-size:12px;color:var(--muted)}
+    .hero{margin:24px 0}
+    .hero h1{margin:0;font-size:30px}
+    .hero p{color:var(--muted);max-width:700px}
 
-    /* Sezioni & Griglie */
-    .section-title{margin:18px 0 12px;font-size:22px}
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-    @media (max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
-    @media (max-width:640px){.grid{grid-template-columns:1fr}}
-
-    /* Card profilo (ispirazione landing kit) */
-    .card{background:#fff;border:1px solid var(--border);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:transform .1s ease, box-shadow .1s ease}
-    .card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(20,22,40,.06)}
-    .cover{aspect-ratio:16/10;object-fit:cover;width:100%}
-    .card-body{padding:16px;flex:1}
+    /* cards */
+    .section-title{margin:18px 0 10px;font-size:22px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+    .card{background:#fff;border:1px solid var(--border);border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .1s ease,box-shadow .1s ease}
+    .card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.06)}
+    .cover{aspect-ratio:16/10;width:100%;object-fit:cover}
+    .card-body{padding:16px}
     .name{font-weight:700;margin:0 0 4px}
-    .subtitle{color:var(--muted);font-size:13px;margin:0 0 10px}
+    .subtitle{color:var(--muted);font-size:13px;margin:0 0 8px}
     .chips{display:flex;flex-wrap:wrap;gap:6px}
-    .pill{font-size:12px;padding:6px 10px;border-radius:999px;background:#f0efff;border:1px solid #e3e1ff;color:#3c3a6a}
-    .card-footer{padding:14px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
-    .btn{background:#1c2136;color:#eef3ff;border:1px solid #283457;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer}
-    .btn:hover{filter:brightness(1.06)}
-    .btn-primary{background:linear-gradient(90deg,var(--accent),#60a5fa);color:#0e1220;border:none}
+    .pill{background:#f0efff;border:1px solid #e3e1ff;color:#3c3a6a;padding:6px 10px;border-radius:999px;font-size:12px}
+    .footer{margin-top:30px;color:#8a93a8;font-size:13px}
 
-    /* Modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.60);display:none;place-items:center;padding:16px;z-index:50}
-    .modal{width:min(980px,100%);background:#fff;border:1px solid var(--border);border-radius:20px;overflow:hidden}
-    .modal-head{padding:18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-    .modal-body{display:grid;grid-template-columns:380px 1fr}
-    @media (max-width:1000px){.modal-body{grid-template-columns:1fr}}
-    .modal-left{padding:18px;border-right:1px solid var(--border)}
-    .modal-right{padding:18px}
-    .about{color:#2b3040;line-height:1.6}
-    label{display:block;font-size:13px;color:#586075;margin:10px 0 6px}
-    input, select, textarea{width:100%;background:#fbfbfe;border:1px solid var(--border);color:#0f1220;border-radius:10px;padding:10px}
-    #map{height:520px;border-radius:14px;border:1px solid var(--border)}
-    .lock{display:grid;place-items:center;height:520px;border:1px dashed var(--border);border-radius:14px;background:linear-gradient(180deg,#fafaff,#f7f7fb)}
-    .lock p{color:#6a6f82}
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;z-index:100}
+    .modal{width:min(780px,95%);background:#fff;border-radius:20px;overflow:hidden}
+    .modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+    .modal-body{padding:18px;display:flex;flex-direction:column;gap:18px}
+    .modal img{width:100%;border-radius:14px;aspect-ratio:16/10;object-fit:cover}
+    .modal h2{margin:10px 0 4px;font-size:22px}
+    .modal p{margin:0 0 12px;line-height:1.5}
+    .close{cursor:pointer;font-size:20px;border:none;background:none;color:#666}
+    .keywords{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+    .keyword{padding:6px 12px;border-radius:999px;border:1px solid var(--border);cursor:pointer;font-size:13px;background:#fafaff}
+    .keyword.active{background:var(--accent);color:white;border-color:var(--accent)}
+    .form{display:flex;flex-direction:column;gap:12px}
+    input[type=email]{padding:10px;border:1px solid var(--border);border-radius:10px;font-size:15px}
+    .btn{padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),#60a5fa);border:none;color:#fff}
+    #map{height:420px;border-radius:14px;border:1px solid var(--border)}
 
-    .footer{margin-top:30px;color:#8a93a8;font-size:13px;text-align:left}
+    .hidden{display:none!important}
   </style>
 </head>
 <body>
   <div class="container">
     <header class="header">
-      <div class="logo"><img src="logo.png" alt="Locals" style="height:36px;vertical-align:middle"></div>
+      <img src="logo.png" alt="Locals" style="height:36px">
       <div class="badge">MVP di validazione</div>
     </header>
 
     <section class="hero">
-      <div>
-        <h1>Mappe umane per viaggiare meglio</h1>
-        <p>Scegli un profilo: vedi la <strong>descrizione</strong> del Local e, lasciando l’email, sblocca la <strong>mappa curata</strong> con i suoi luoghi preferiti. Due città per iniziare: Milano e Roma.</p>
-      </div>
-      <div></div>
+      <h1>Mappe umane per viaggiare meglio</h1>
+      <p>Scopri le città attraverso chi le vive. Leggi il profilo, e sblocca la mappa personalizzata dopo aver inserito la tua email.</p>
     </section>
 
     <section id="cards"></section>
-
-    <!-- MODAL -->
-    <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true">
-      <div class="modal">
-        <div class="modal-head">
-          <div>
-            <div id="modalTitle" style="font-weight:800"></div>
-            <div id="modalSubtitle" style="font-size:13px;color:#6a6f82"></div>
-          </div>
-          <button id="modalClose" class="btn">Chiudi</button>
-        </div>
-        <div class="modal-body">
-          <div class="modal-left">
-            <img id="modalCover" src="" alt="" style="width:100%;border-radius:12px;aspect-ratio:16/10;object-fit:cover;margin-bottom:12px">
-            <p id="modalAbout" class="about"></p>
-
-            <form id="unlockForm" style="margin-top:14px">
-              <label for="email">Email per sbloccare la mappa</label>
-              <input id="email" type="email" required placeholder="nome@email.com" />
-              <label for="nights">Notti in città</label>
-              <select id="nights">
-                <option>1</option><option selected>2</option><option>3</option><option>4+</option>
-              </select>
-              <label for="interests">Interessi principali</label>
-              <select id="interests" multiple size="4">
-                <option>Foodie</option>
-                <option>Arte & cultura</option>
-                <option>Natura</option>
-                <option>Nightlife</option>
-              </select>
-              <label for="notes">Note opzionali</label>
-              <textarea id="notes" rows="3" placeholder="Es. senza glutine, budget, zone preferite…"></textarea>
-              <div style="display:flex;gap:8px;margin-top:12px">
-                <button class="btn btn-primary" type="submit">Sblocca mappa</button>
-                <button class="btn" type="button" id="btnSkip">Salta</button>
-              </div>
-              <p style="color:#7a8096;font-size:12px;margin-top:8px">I dati sono usati solo per la validazione MVP.</p>
-            </form>
-          </div>
-
-          <div class="modal-right">
-            <div id="lockBox" class="lock"><p>La mappa apparirà qui dopo lo sblocco.</p></div>
-            <div id="map" class="hidden" aria-hidden="true"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <footer class="footer">© Locals – prototipo di validazione.</footer>
   </div>
 
-  <!-- Leaflet JS -->
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""
-  ></script>
+  <!-- modal -->
+  <div id="modal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <div id="modalTitle" style="font-weight:700"></div>
+          <div id="modalSubtitle" style="font-size:13px;color:#6a6f82"></div>
+        </div>
+        <button id="modalClose" class="close">✕</button>
+      </div>
+      <div class="modal-body">
+        <img id="modalCover" src="" alt="">
+        <p id="modalAbout"></p>
 
+        <div class="keywords" id="keywords"></div>
+
+        <form id="unlockForm" class="form">
+          <input id="email" type="email" placeholder="Inserisci la tua email per sbloccare" required>
+          <button type="submit" id="btnUnlock" class="btn btn-primary">Sblocca mappa</button>
+        </form>
+
+        <div id="map" class="hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
-    /* ========= CONFIG ========= */
-    const SUBMIT_ENDPOINT = ""; // es. "https://formspree.io/f/xxxxxxx"
+    const SUBMIT_ENDPOINT = "";
 
-    // Foto fittizie: picsum.photos/seed/<seed>/600/360
-    const img = (seed) => `https://picsum.photos/seed/${seed}/800/500`;
-
-    // Profili Milano & Roma
+    const img = (seed) => `https://unsplash.it/600/400?image=${seed}`;
     const MAPS = [
-      // MILANO
-      {
-        id:"mi-giulia",
-        city:"Milano",
-        title:"Giulia – Foodie & Design",
-        cover: img("giulia-milano"),
-        author:{ name:"Giulia R.", avatar:"G", tagline:"Product designer, colazioni d’autore" },
-        interests:["Foodie","Design","Caffè di quartiere"],
-        about:`Sono cresciuta tra laboratori di pasticceria e studi di design. La mia Milano è fatta di
-        panifici artigianali, bookshop di musei, cortili nascosti e caffetterie dove fermarsi a
-        osservare la città. Amo mixare classici e nuove aperture.`,
+      { id:"mi-giulia", city:"Milano", title:"Giulia – Foodie & Design", cover:img(1001),
+        subtitle:"Product designer e pasticcerie d’autore",
+        about:`Pasticcerie, bookshop, cortili nascosti e caffè curati. Milano da vivere con gusto.`,
+        keywords:["Foodie","Design","Caffè","Brunch","Arte"],
         center:[45.463,9.189],
-        poi:[
-          { name:"Trippa", type:"Ristorante", coords:[45.4508,9.2054] },
-          { name:"Bar Luce", type:"Caffè", coords:[45.4516,9.1796] },
-          { name:"Pavé", type:"Bakery", coords:[45.4773,9.2058] },
-          { name:"10 Corso Como", type:"Concept", coords:[45.4848,9.1849] },
-          { name:"Isola murales", type:"Passeggiata", coords:[45.4897,9.1911] }
-        ]
+        poi:[[45.45,9.20],[45.47,9.21],[45.48,9.18]]
       },
-      {
-        id:"mi-luca",
-        city:"Milano",
-        title:"Luca – Tech & Alternative Night",
-        cover: img("luca-milano"),
-        author:{ name:"Luca T.", avatar:"L", tagline:"Dev by day, clubber by night" },
-        interests:["Nightlife","Elettronica","Startups"],
-        about:`Di giorno frequento coworking e community tech; la sera esploro club, rassegne
-        indipendenti e cocktail bar sperimentali. Ti porto tra vecchie fabbriche riconvertite e spot
-        dove la line-up è sempre una sorpresa.`,
+      { id:"mi-luca", city:"Milano", title:"Luca – Tech & Alternative Night", cover:img(1005),
+        subtitle:"Dev by day, clubber by night",
+        about:`Dai coworking ai club nascosti tra Navigli e Isola. Milano alternativa e notturna.`,
+        keywords:["Nightlife","Startups","Musica","Cocktail"],
         center:[45.463,9.189],
-        poi:[
-          { name:"BASE", type:"Hub", coords:[45.4517,9.1702] },
-          { name:"Tempio del Futuro Perduto", type:"Spazio", coords:[45.4899,9.1802] },
-          { name:"Tunnel Club", type:"Club", coords:[45.4868,9.2018] }
-        ]
+        poi:[[45.47,9.19],[45.45,9.17],[45.48,9.20]]
       },
-      {
-        id:"mi-chiara",
-        city:"Milano",
-        title:"Chiara – Verde & Family",
-        cover: img("chiara-milano"),
-        author:{ name:"Chiara B.", avatar:"C", tagline:"Mamma trek e merende nei parchi" },
-        interests:["Parchi","Bambini","Passeggiate"],
-        about:`Milano a misura di famiglia: prati, cascine urbane, piste facili e merende buone.
-        Percorsi semplici per muoversi con passeggino, aree gioco e musei kids-friendly.`,
-        center:[45.463,9.189],
-        poi:[
-          { name:"Parco Sempione", type:"Parco", coords:[45.4720,9.1720] },
-          { name:"Cascina Cuccagna", type:"Cascina", coords:[45.4511,9.2085] },
-          { name:"BAM", type:"Parco", coords:[45.4855,9.1900] }
-        ]
-      },
-
-      // ROMA
-      {
-        id:"rm-sara",
-        city:"Roma",
-        title:"Sara – Classici & Nascosti",
-        cover: img("sara-roma"),
-        author:{ name:"Sara P.", avatar:"S", tagline:"Archivista, cortili e prospettive" },
-        interests:["Storia","Fotografia","Giardini"],
-        about:`Amo i punti di vista silenziosi: cortili, logge, belvederi al tramonto. Con me Roma è
-        fatta di strade lente, mercati rionali e angoli verdi dove il tempo si allunga.`,
+      { id:"rm-sara", city:"Roma", title:"Sara – Classici & Nascosti", cover:img(1020),
+        subtitle:"Archivista e cortili segreti",
+        about:`Belvederi, logge e giardini romani: una Roma lenta e fotografica.`,
+        keywords:["Storia","Fotografia","Giardini","Relax"],
         center:[41.9028,12.4964],
-        poi:[
-          { name:"Gianicolo", type:"Panorama", coords:[41.8925,12.4612] },
-          { name:"Coppedè", type:"Quartiere", coords:[41.9197,12.5116] },
-          { name:"Orto Botanico", type:"Giardino", coords:[41.8938,12.4660] }
-        ]
+        poi:[[41.89,12.47],[41.90,12.48],[41.91,12.50]]
       },
-      {
-        id:"rm-davide",
-        city:"Roma",
-        title:"Davide – Street Food & Nightlife",
-        cover: img("davide-roma"),
-        author:{ name:"Davide A.", avatar:"D", tagline:"Food trucker, nottambulo curioso" },
-        interests:["Street food","Nightlife","Birre artigianali"],
-        about:`Supplì croccanti, pizza di quartiere e miscelazione di livello. Ti porto tra piazze vive,
-        birrerie artigianali e vicoli dove fermarsi a parlare fino a tardi.`,
+      { id:"rm-davide", city:"Roma", title:"Davide – Street Food & Nightlife", cover:img(1027),
+        subtitle:"Food trucker e nottambulo",
+        about:`Supplì croccanti, piazze vive e birre artigianali. Roma da assaporare fino a tardi.`,
+        keywords:["Street food","Nightlife","Birre","Aperitivi"],
         center:[41.9028,12.4964],
-        poi:[
-          { name:"Trapizzino Testaccio", type:"Street food", coords:[41.8769,12.4769] },
-          { name:"Open Baladin", type:"Birreria", coords:[41.8984,12.4737] },
-          { name:"Drink Kong", type:"Cocktail", coords:[41.9000,12.4797] }
-        ]
-      },
-      {
-        id:"rm-elena",
-        city:"Roma",
-        title:"Elena – Verde & Family",
-        cover: img("elena-roma"),
-        author:{ name:"Elena V.", avatar:"E", tagline:"Educatrice outdoor e gelati in villa" },
-        interests:["Parchi","Bambini","Passeggiate"],
-        about:`Ville storiche, ciclabili facili e soste per gelati incredibili. Itinerari soft, aree gioco e
-        laboratori per bambini, tra alberi e fontane.`,
-        center:[41.9028,12.4964],
-        poi:[
-          { name:"Villa Borghese", type:"Parco", coords:[41.9142,12.4923] },
-          { name:"Explora", type:"Museo bambini", coords:[41.9147,12.4723] },
-          { name:"Parco Acquedotti", type:"Parco", coords:[41.8546,12.5624] }
-        ]
+        poi:[[41.88,12.47],[41.90,12.48],[41.92,12.49]]
       }
     ];
 
-    /* ========= RENDER ========= */
     const cardsEl = document.getElementById('cards');
-
-    const cardHtml = (m) => `
-      <article class="card" onclick="openModal('${m.id}')">
-        <img class="cover" src="${m.cover}" alt="${m.title}">
-        <div class="card-body">
-          <h3 class="name">${m.title}</h3>
-          <p class="subtitle">${m.author.name} — ${m.author.tagline}</p>
-          <div class="chips">${m.interests.map(t=>`<span class="pill">${t}</span>`).join('')}</div>
-        </div>
-        <div class="card-footer">
-          <button class="btn">Apri profilo</button>
-          <button class="btn btn-primary">Sblocca</button>
-        </div>
-      </article>`;
-
-    function renderSection(title, list){
-      return `
-        <h2 class="section-title">${title}</h2>
-        <div class="grid">
-          ${list.map(cardHtml).join('')}
-        </div>`;
-    }
-
-    function renderCards(){
-      const mi = MAPS.filter(m=>m.city==="Milano");
-      const rm = MAPS.filter(m=>m.city==="Roma");
-      cardsEl.innerHTML = renderSection("Milano", mi) + renderSection("Roma", rm);
-    }
-
-    /* ========= MODAL + MAP ========= */
     const modal = document.getElementById('modal');
     const modalTitle = document.getElementById('modalTitle');
     const modalSubtitle = document.getElementById('modalSubtitle');
     const modalCover = document.getElementById('modalCover');
     const modalAbout = document.getElementById('modalAbout');
+    const keywordsBox = document.getElementById('keywords');
     const unlockForm = document.getElementById('unlockForm');
-    const btnSkip = document.getElementById('btnSkip');
-    const lockBox = document.getElementById('lockBox');
+    const emailInput = document.getElementById('email');
+    const btnUnlock = document.getElementById('btnUnlock');
     const mapDiv = document.getElementById('map');
 
-    let currentMap = null;
-    let mapInstance = null;
-    let markers = [];
+    let current = null, mapInstance=null, markers=[];
 
-    function hasUnlock(id){
-      try{
-        const v = JSON.parse(localStorage.getItem(`unlock:${id}`) || "null");
-        return v && (v.email || v.skipped === true);
-      }catch(_){ return false; }
+    function cardHtml(m){
+      return `
+      <article class="card" onclick="openModal('${m.id}')">
+        <img class="cover" src="${m.cover}" alt="${m.title}">
+        <div class="card-body">
+          <h3 class="name">${m.title}</h3>
+          <p class="subtitle">${m.subtitle}</p>
+          <div class="chips">${m.keywords.map(k=>`<span class="pill">${k}</span>`).join('')}</div>
+        </div>
+      </article>`;
     }
 
-    function toggleMapVisibility(show){
-      if(show){
-        lockBox.classList.add('hidden');
-        mapDiv.classList.remove('hidden');
-        mapDiv.setAttribute('aria-hidden','false');
-      }else{
-        mapDiv.classList.add('hidden');
-        lockBox.classList.remove('hidden');
-        mapDiv.setAttribute('aria-hidden','true');
-      }
+    function renderCards(){
+      const milano = MAPS.filter(x=>x.city==="Milano");
+      const roma = MAPS.filter(x=>x.city==="Roma");
+      cardsEl.innerHTML = `
+        <h2 class="section-title">Milano</h2>
+        <div class="grid">${milano.map(cardHtml).join('')}</div>
+        <h2 class="section-title">Roma</h2>
+        <div class="grid">${roma.map(cardHtml).join('')}</div>`;
     }
 
-    function openModal(mapId){
-      const m = MAPS.find(x=>x.id===mapId);
-      currentMap = m;
-
-      modalTitle.textContent = `${m.title} • ${m.city}`;
-      modalSubtitle.textContent = `${m.author.name} — ${m.author.tagline}`;
-      modalCover.src = m.cover;
-      modalAbout.textContent = m.about;
-
-      // mostra/nascondi mappa in base allo sblocco
-      const unlocked = hasUnlock(m.id);
-      toggleMapVisibility(unlocked);
-      unlockForm.classList.toggle('hidden', unlocked);
-
+    function openModal(id){
+      current = MAPS.find(x=>x.id===id);
+      modalTitle.textContent = current.title;
+      modalSubtitle.textContent = current.subtitle;
+      modalCover.src = current.cover;
+      modalAbout.textContent = current.about;
+      mapDiv.classList.add('hidden');
+      unlockForm.reset();
+      renderKeywords();
       modal.style.display = 'grid';
-      if(unlocked) setTimeout(initMap, 0); // inizializza mappa solo se sbloccata
     }
 
-    function closeModal(){ modal.style.display = 'none'; }
-    document.getElementById('modalClose').addEventListener('click', closeModal);
+    function closeModal(){ modal.style.display='none'; }
+    document.getElementById('modalClose')?.addEventListener('click',closeModal);
+    document.getElementById('modalClose')?.addEventListener('touchstart',closeModal);
+    document.getElementById('modalClose') || (document.getElementById('modalClose')?.addEventListener('click',closeModal));
+    document.getElementById('modalClose') || document.querySelector('.close').addEventListener('click',closeModal);
 
-    function initMap(){
-      if(!currentMap) return;
+    function renderKeywords(){
+      keywordsBox.innerHTML = "";
+      current.keywords.forEach(k=>{
+        const el = document.createElement("div");
+        el.textContent = k;
+        el.className = "keyword";
+        el.onclick = ()=>el.classList.toggle("active");
+        keywordsBox.appendChild(el);
+      });
+    }
 
+    unlockForm.addEventListener('submit',e=>{
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      if(!email) return alert("Inserisci un'email valida per sbloccare la mappa");
+      showMap();
+    });
+
+    function showMap(){
+      mapDiv.classList.remove('hidden');
       if(!mapInstance){
         mapInstance = L.map('map');
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19,
-          attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(mapInstance);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInstance);
       }
-
-      // reset
       markers.forEach(m=>m.remove());
-      markers = [];
-
-      mapInstance.setView(currentMap.center, 13);
-
-      currentMap.poi.forEach(p=>{
-        const mk = L.marker(p.coords).addTo(mapInstance).bindPopup(`<b>${p.name}</b><br><small>${p.type||""}</small>`);
+      markers=[];
+      mapInstance.setView(current.center,13);
+      current.poi.forEach(p=>{
+        const mk=L.marker(p).addTo(mapInstance);
         markers.push(mk);
       });
     }
 
-    /* ========= SUBMIT / UNLOCK ========= */
-    function saveUnlock(data){
-      const key = `unlock:${currentMap.id}`;
-      localStorage.setItem(key, JSON.stringify({ ...data, ts: Date.now() }));
-    }
-
-    async function submitUnlock(data){
-      if(!SUBMIT_ENDPOINT) return { ok:true };
-      try{
-        const res = await fetch(SUBMIT_ENDPOINT, {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify(data)
-        });
-        return { ok: res.ok };
-      }catch(e){ return { ok:false }; }
-    }
-
-    unlockForm.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const payload = {
-        mapId: currentMap?.id,
-        city: currentMap?.city,
-        email: document.getElementById('email').value.trim(),
-        nights: document.getElementById('nights').value,
-        interests: Array.from(document.getElementById('interests').selectedOptions).map(o=>o.value),
-        notes: document.getElementById('notes').value.trim(),
-        ua: navigator.userAgent
-      };
-      saveUnlock(payload);
-      await submitUnlock(payload);
-
-      // mostra mappa
-      toggleMapVisibility(true);
-      unlockForm.classList.add('hidden');
-      setTimeout(initMap, 0);
-    });
-
-    btnSkip.addEventListener('click', ()=>{
-      saveUnlock({ mapId: currentMap?.id, city: currentMap?.city, skipped:true, ua:navigator.userAgent });
-      toggleMapVisibility(true);
-      unlockForm.classList.add('hidden');
-      setTimeout(initMap, 0);
-    });
-
-    /* ========= INIT ========= */
-    function getQueryParam(name){ return new URLSearchParams(location.search).get(name); }
-
-    (function init(){
-      renderCards();
-      const q = getQueryParam('map');
-      if(q){ const m = MAPS.find(x=>x.id===q); if(m){ openModal(q); } }
-    })();
+    renderCards();
   </script>
 </body>
 </html>
+
