@@ -77,15 +77,10 @@
 
     <section class="hero">
       <div>
-        <h1>Seleziona la città e sblocca una mappa curata</h1>
+        <h1>Sblocca una mappa curata</h1>
         <p>Mappe personali create da Local: selezioni ragionate di luoghi e micro-esperienze.</p>
       </div>
-      <div class="city-toggle">
-        <span style="color:var(--muted);font-size:14px">Città</span>
-        <button id="btnMilano" class="city-btn">Milano</button>
-        <button id="btnRoma" class="city-btn">Roma</button>
-        <button id="btnReset" class="btn btn-ghost">Reset</button>
-      </div>
+      <div></div>
     </section>
 
     <!-- Cards elenco Local -->
@@ -314,13 +309,21 @@
     }
 
     function renderCards(){
-      const city = window._selectedCity || 'Milano';
-      const list = MAPS.filter(m => m.city === city);
-      // attiva evidenza pulsanti
-      updateCityButtons();
-      // render
-      cardsEl.innerHTML = list.map(cardHtml).join('');
+      const milano = MAPS.filter(m => m.city === 'Milano');
+      const roma   = MAPS.filter(m => m.city === 'Roma');
+    
+      const sectionHtml = (titolo, items) => `
+        <h2 style="margin:16px 0 8px;font-size:22px">${titolo}</h2>
+        <div class="grid">
+          ${items.map(cardHtml).join('')}
+        </div>
+      `;
+    
+      cardsEl.innerHTML =
+        sectionHtml('Milano', milano) +
+        sectionHtml('Roma', roma);
     }
+
 
     // ==========================
     //  MODAL + MAP LOGIC
@@ -440,30 +443,9 @@
       return new URLSearchParams(location.search).get(name)
     }
 
-    function setCity(city){
-      window._selectedCity = city;
-      renderCards();
-    }
-    
-    function updateCityButtons(){
-      const mi = document.getElementById('btnMilano');
-      const rm = document.getElementById('btnRoma');
-      if(!mi || !rm) return;
-      mi.classList.toggle('active', (window._selectedCity || 'Milano') === 'Milano');
-      rm.classList.toggle('active', (window._selectedCity || 'Milano') === 'Roma');
-    }
     
     (function init(){
-      // default: Milano
-      window._selectedCity = 'Milano';
-    
-      // listener pulsanti città
-      const mi = document.getElementById('btnMilano');
-      const rm = document.getElementById('btnRoma');
-      if(mi) mi.addEventListener('click', () => setCity('Milano'));
-      if(rm) rm.addEventListener('click', () => setCity('Roma'));
-    
-      // render iniziale
+      // render iniziale: mostra Milano e Roma
       renderCards();
     
       // deep link ?map=...
@@ -471,13 +453,11 @@
       if(q){
         const m = MAPS.find(x => x.id === q);
         if(m){
-          window._selectedCity = m.city;
-          updateCityButtons();
-          renderCards();
           openModal(q);
         }
       }
     })();
+
   </script>
 </body>
 </html>
