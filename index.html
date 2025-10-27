@@ -42,6 +42,11 @@
     .hero{margin:12px 0 24px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     .hero h1{margin:0;font-size:28px}
     .hero p{margin:4px 0;color:var(--muted)}
+    /* toggle città */
+    .city-toggle{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .city-btn{border:1px solid var(--border);background:#1b2335;color:#eaf2ff;padding:8px 14px;border-radius:999px;cursor:pointer}
+    .city-btn.active{background:linear-gradient(90deg,var(--accent),#60a5fa);color:#0b1020;border-color:transparent;font-weight:700}
+
 
     /* Modal */
     .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center;padding:16px;z-index:50}
@@ -73,14 +78,12 @@
     <section class="hero">
       <div>
         <h1>Seleziona la città e sblocca una mappa curata</h1>
-        <p>Mappe personali create da Local: selezioni ragionate di luoghi e micro‑esperienze.</p>
+        <p>Mappe personali create da Local: selezioni ragionate di luoghi e micro-esperienze.</p>
       </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <label for="citySelect" style="margin:0;color:var(--muted);font-size:14px">Città</label>
-        <select id="citySelect" class="btn" style="padding:8px 10px">
-          <option value="Milano" selected>Milano</option>
-          <option value="Roma">Roma</option>
-        </select>
+      <div class="city-toggle">
+        <span style="color:var(--muted);font-size:14px">Città</span>
+        <button id="btnMilano" class="city-btn">Milano</button>
+        <button id="btnRoma" class="city-btn">Roma</button>
         <button id="btnReset" class="btn btn-ghost">Reset</button>
       </div>
     </section>
@@ -329,7 +332,10 @@
 
     function renderCards(){
       const city = window._selectedCity || 'Milano';
-      const list = MAPS.filter(m=>m.city===city);
+      const list = MAPS.filter(m => m.city === city);
+      // attiva evidenza pulsanti
+      updateCityButtons();
+      // render
       cardsEl.innerHTML = list.map(cardHtml).join('');
     }
 
@@ -451,11 +457,43 @@
       return new URLSearchParams(location.search).get(name)
     }
 
-    (function init(){
+    function setCity(city){
+      window._selectedCity = city;
       renderCards();
+    }
+    
+    function updateCityButtons(){
+      const mi = document.getElementById('btnMilano');
+      const rm = document.getElementById('btnRoma');
+      if(!mi || !rm) return;
+      mi.classList.toggle('active', (window._selectedCity || 'Milano') === 'Milano');
+      rm.classList.toggle('active', (window._selectedCity || 'Milano') === 'Roma');
+    }
+    
+    (function init(){
+      // default: Milano
+      window._selectedCity = 'Milano';
+    
+      // listener pulsanti città
+      const mi = document.getElementById('btnMilano');
+      const rm = document.getElementById('btnRoma');
+      if(mi) mi.addEventListener('click', () => setCity('Milano'));
+      if(rm) rm.addEventListener('click', () => setCity('Roma'));
+    
+      // render iniziale
+      renderCards();
+    
+      // deep link ?map=...
       const q = getQueryParam('map');
-      if(q){ const m = MAPS.find(x=>x.id===q); if(m){ window._selectedCity = m.city; document.getElementById('citySelect').value = m.city; openModal(q); }}
-      document.getElementById('citySelect').addEventListener('change', (e)=>{ window._selectedCity = e.target.value; renderCards(); });
+      if(q){
+        const m = MAPS.find(x => x.id === q);
+        if(m){
+          window._selectedCity = m.city;
+          updateCityButtons();
+          renderCards();
+          openModal(q);
+        }
+      }
     })();
   </script>
 </body>
