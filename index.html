@@ -1,231 +1,291 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Locals – Mappe umane (MVP)</title>
-  <meta name="description" content="Scopri mappe curate da Local fittizi per Milano e Roma: sblocca la mappa inserendo la tua email.">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Locals – Mappe umane (MVP)</title>
+<meta name="description" content="Profili Local per Milano e Roma. Sblocca la mappa inserendo la tua email.">
 
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-  <style>
-    :root{
-      --bg:#ffffff;--text:#16171c;--muted:#5f6474;
-      --accent:#7b6df0;--accent2:#a78bfa;--border:#e7e9f4;
-      --card:#fafaff;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;color:var(--text)}
-    .container{max-width:1100px;margin:auto;padding:24px}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
-    /* header */
-    .header{display:flex;justify-content:space-between;align-items:center}
-    .badge{border:1px solid var(--border);padding:4px 10px;border-radius:999px;font-size:12px;color:var(--muted)}
-    .hero{margin:24px 0}
-    .hero h1{margin:0;font-size:30px}
-    .hero p{color:var(--muted);max-width:700px}
+<style>
+:root{
+  --bg:#ffffff; --text:#16171c; --muted:#61667a;
+  --accent:#7b6df0; --accent2:#a78bfa; --border:#e7e9f4; --card:#fafaff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+     font:15.5px/1.55 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;}
+.container{max-width:1100px;margin:auto;padding:20px 24px}
+.header{display:flex;justify-content:space-between;align-items:center}
+.badge{border:1px solid var(--border);padding:4px 10px;border-radius:999px;font-size:12px;color:var(--muted)}
+.hero{margin:18px 0}
+.hero h1{margin:0 0 6px;font-size:28px}
+.hero p{margin:0;color:var(--muted);max-width:720px}
 
-    /* cards */
-    .section-title{margin:18px 0 10px;font-size:22px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
-    .card{background:#fff;border:1px solid var(--border);border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .1s ease,box-shadow .1s ease}
-    .card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.06)}
-    .cover{aspect-ratio:16/10;width:100%;object-fit:cover}
-    .card-body{padding:16px}
-    .name{font-weight:700;margin:0 0 4px}
-    .subtitle{color:var(--muted);font-size:13px;margin:0 0 8px}
-    .chips{display:flex;flex-wrap:wrap;gap:6px}
-    .pill{background:#f0efff;border:1px solid #e3e1ff;color:#3c3a6a;padding:6px 10px;border-radius:999px;font-size:12px}
-    .footer{margin-top:30px;color:#8a93a8;font-size:13px}
+/* cards */
+.section-title{margin:14px 0 10px;font-size:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;
+      transition:transform .1s ease, box-shadow .1s ease}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(0,0,0,.06)}
+.cover{width:100%;height:220px;object-fit:cover;display:block}
+.card-body{padding:12px 14px}
+.name{font-weight:700;margin:0 0 2px}
+.subtitle{color:var(--muted);font-size:12.5px;margin:0 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.pill{background:#f0efff;border:1px solid #e3e1ff;color:#3c3a6a;padding:5px 9px;border-radius:999px;font-size:11.5px}
 
-    /* modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;z-index:100}
-    .modal{width:min(780px,95%);background:#fff;border-radius:20px;overflow:hidden}
-    .modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-    .modal-body{padding:18px;display:flex;flex-direction:column;gap:18px}
-    .modal img{width:100%;border-radius:14px;aspect-ratio:16/10;object-fit:cover}
-    .modal h2{margin:10px 0 4px;font-size:22px}
-    .modal p{margin:0 0 12px;line-height:1.5}
-    .close{cursor:pointer;font-size:20px;border:none;background:none;color:#666}
-    .keywords{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
-    .keyword{padding:6px 12px;border-radius:999px;border:1px solid var(--border);cursor:pointer;font-size:13px;background:#fafaff}
-    .keyword.active{background:var(--accent);color:white;border-color:var(--accent)}
-    .form{display:flex;flex-direction:column;gap:12px}
-    input[type=email]{padding:10px;border:1px solid var(--border);border-radius:10px;font-size:15px}
-    .btn{padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer}
-    .btn-primary{background:linear-gradient(90deg,var(--accent),#60a5fa);border:none;color:#fff}
-    #map{height:420px;border-radius:14px;border:1px solid var(--border)}
-
-    .hidden{display:none!important}
-  </style>
+/* modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;z-index:100}
+.modal{width:min(760px,96%);background:#fff;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;max-height:90vh}
+.modal-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-title{font-weight:800}
+.modal-sub{font-size:12.5px;color:#6a6f82}
+.close{cursor:pointer;font-size:18px;border:none;background:none;color:#666;line-height:1}
+.modal-body{padding:14px 16px;overflow:auto}
+.modal img{width:100%;height:220px;border-radius:12px;object-fit:cover}
+.about{margin:10px 0 10px}
+.keywords{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.keyword{padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fafaff;font-size:12.5px;cursor:pointer}
+.keyword.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.form{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin:8px 0 0}
+input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:10px;font-size:14.5px;width:100%}
+.btn{padding:10px 12px;border-radius:10px;font-weight:700;cursor:pointer}
+.btn-primary{background:linear-gradient(90deg,var(--accent),#60a5fa);border:none;color:#fff}
+.map-wrap{margin-top:12px}
+#map{height:360px;border-radius:12px;border:1px solid var(--border)}
+.footer{margin-top:24px;color:#8a93a8;font-size:12.5px}
+.hidden{display:none!important}
+</style>
 </head>
 <body>
   <div class="container">
     <header class="header">
-      <img src="logo.png" alt="Locals" style="height:36px">
+      <img src="logo.png" alt="Locals" style="height:34px">
       <div class="badge">MVP di validazione</div>
     </header>
 
     <section class="hero">
       <h1>Mappe umane per viaggiare meglio</h1>
-      <p>Scopri le città attraverso chi le vive. Leggi il profilo, e sblocca la mappa personalizzata dopo aver inserito la tua email.</p>
+      <p>Leggi il profilo del Local e sblocca la mappa personalizzata inserendo la tua email.</p>
     </section>
 
     <section id="cards"></section>
     <footer class="footer">© Locals – prototipo di validazione.</footer>
   </div>
 
-  <!-- modal -->
-  <div id="modal" class="modal-backdrop">
+  <!-- Modal -->
+  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal">
       <div class="modal-head">
         <div>
-          <div id="modalTitle" style="font-weight:700"></div>
-          <div id="modalSubtitle" style="font-size:13px;color:#6a6f82"></div>
+          <div id="modalTitle" class="modal-title"></div>
+          <div id="modalSubtitle" class="modal-sub"></div>
         </div>
-        <button id="modalClose" class="close">✕</button>
+        <button id="modalClose" class="close" aria-label="Chiudi">✕</button>
       </div>
       <div class="modal-body">
-        <img id="modalCover" src="" alt="">
-        <p id="modalAbout"></p>
-
-        <div class="keywords" id="keywords"></div>
+        <img id="modalCover" src="" alt="" loading="lazy">
+        <p id="modalAbout" class="about"></p>
+        <div id="keywords" class="keywords"></div>
 
         <form id="unlockForm" class="form">
-          <input id="email" type="email" placeholder="Inserisci la tua email per sbloccare" required>
+          <input id="email" type="email" placeholder="Email per sbloccare la mappa" required>
           <button type="submit" id="btnUnlock" class="btn btn-primary">Sblocca mappa</button>
         </form>
 
-        <div id="map" class="hidden"></div>
+        <div id="mapWrap" class="map-wrap hidden">
+          <div id="map"></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script>
-    const SUBMIT_ENDPOINT = "";
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+/* ---------- CONFIG ---------- */
+const SUBMIT_ENDPOINT = ""; // opzionale
 
-    const img = (seed) => `https://unsplash.it/600/400?image=${seed}`;
-    const MAPS = [
-      { id:"mi-giulia", city:"Milano", title:"Giulia – Foodie & Design", cover:img(1001),
-        subtitle:"Product designer e pasticcerie d’autore",
-        about:`Pasticcerie, bookshop, cortili nascosti e caffè curati. Milano da vivere con gusto.`,
-        keywords:["Foodie","Design","Caffè","Brunch","Arte"],
-        center:[45.463,9.189],
-        poi:[[45.45,9.20],[45.47,9.21],[45.48,9.18]]
-      },
-      { id:"mi-luca", city:"Milano", title:"Luca – Tech & Alternative Night", cover:img(1005),
-        subtitle:"Dev by day, clubber by night",
-        about:`Dai coworking ai club nascosti tra Navigli e Isola. Milano alternativa e notturna.`,
-        keywords:["Nightlife","Startups","Musica","Cocktail"],
-        center:[45.463,9.189],
-        poi:[[45.47,9.19],[45.45,9.17],[45.48,9.20]]
-      },
-      { id:"rm-sara", city:"Roma", title:"Sara – Classici & Nascosti", cover:img(1020),
-        subtitle:"Archivista e cortili segreti",
-        about:`Belvederi, logge e giardini romani: una Roma lenta e fotografica.`,
-        keywords:["Storia","Fotografia","Giardini","Relax"],
-        center:[41.9028,12.4964],
-        poi:[[41.89,12.47],[41.90,12.48],[41.91,12.50]]
-      },
-      { id:"rm-davide", city:"Roma", title:"Davide – Street Food & Nightlife", cover:img(1027),
-        subtitle:"Food trucker e nottambulo",
-        about:`Supplì croccanti, piazze vive e birre artigianali. Roma da assaporare fino a tardi.`,
-        keywords:["Street food","Nightlife","Birre","Aperitivi"],
-        center:[41.9028,12.4964],
-        poi:[[41.88,12.47],[41.90,12.48],[41.92,12.49]]
-      }
-    ];
+// immagini leggere (unsplash via.it) 480x300 approx
+const img = (seed) => `https://picsum.photos/seed/${encodeURIComponent(seed)}/640/400`;
 
-    const cardsEl = document.getElementById('cards');
-    const modal = document.getElementById('modal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalSubtitle = document.getElementById('modalSubtitle');
-    const modalCover = document.getElementById('modalCover');
-    const modalAbout = document.getElementById('modalAbout');
-    const keywordsBox = document.getElementById('keywords');
-    const unlockForm = document.getElementById('unlockForm');
-    const emailInput = document.getElementById('email');
-    const btnUnlock = document.getElementById('btnUnlock');
-    const mapDiv = document.getElementById('map');
+const MAPS = [
+  // Milano – più POI con popup
+  { id:"mi-giulia", city:"Milano", title:"Giulia – Foodie & Design",
+    cover:img("giulia-milano"),
+    subtitle:"Product designer e pasticcerie d’autore",
+    about:"Pasticcerie, bookshop, cortili nascosti e caffè curati. Milano da vivere con gusto.",
+    keywords:["Foodie","Design","Caffè","Brunch","Arte"],
+    center:[45.463,9.189],
+    poi:[
+      {name:"Trippa",type:"Ristorante",coords:[45.4508,9.2054]},
+      {name:"Bar Luce",type:"Caffè",coords:[45.4516,9.1796]},
+      {name:"Pavé",type:"Bakery",coords:[45.4773,9.2058]},
+      {name:"10 Corso Como",type:"Concept",coords:[45.4848,9.1849]},
+      {name:"Isola Murales",type:"Passeggiata",coords:[45.4897,9.1911]},
+      {name:"Eutopia",type:"Wine Bar",coords:[45.4706,9.2069]},
+      {name:"Upcycle",type:"Café",coords:[45.4890,9.2276]},
+      {name:"Nonostante Marras",type:"Spazio",coords:[45.4746,9.1609]},
+      {name:"Drogheria Milanese",type:"Bistrot",coords:[45.4648,9.1771]},
+      {name:"MAG Café",type:"Cocktail",coords:[45.4513,9.1838]},
+    ]
+  },
+  { id:"mi-luca", city:"Milano", title:"Luca – Tech & Alternative Night",
+    cover:img("luca-milano"),
+    subtitle:"Dev by day, clubber by night",
+    about:"Coworking e club nascosti tra Navigli e Isola. Milano alternativa e notturna.",
+    keywords:["Nightlife","Startups","Musica","Cocktail"],
+    center:[45.463,9.189],
+    poi:[
+      {name:"BASE",type:"Hub",coords:[45.4517,9.1702]},
+      {name:"Tempio del Futuro Perduto",type:"Spazio",coords:[45.4899,9.1802]},
+      {name:"Tunnel Club",type:"Club",coords:[45.4868,9.2018]},
+      {name:"FAQ",type:"Club",coords:[45.4653,9.1910]},
+      {name:"Le Biciclette",type:"Bar",coords:[45.4616,9.1865]},
+      {name:"Spirit de Milan",type:"Club",coords:[45.5185,9.1408]},
+      {name:"NoLo",type:"Quartiere",coords:[45.4970,9.2185]},
+    ]
+  },
 
-    let current = null, mapInstance=null, markers=[];
+  // Roma
+  { id:"rm-sara", city:"Roma", title:"Sara – Classici & Nascosti",
+    cover:img("sara-roma"),
+    subtitle:"Archivista e cortili segreti",
+    about:"Belvederi, logge e giardini romani: una Roma lenta e fotografica.",
+    keywords:["Storia","Fotografia","Giardini","Relax"],
+    center:[41.9028,12.4964],
+    poi:[
+      {name:"Gianicolo",type:"Panorama",coords:[41.8925,12.4612]},
+      {name:"Coppedè",type:"Quartiere",coords:[41.9197,12.5116]},
+      {name:"Orto Botanico",type:"Giardino",coords:[41.8938,12.4660]},
+      {name:"Mercato Testaccio",type:"Mercato",coords:[41.8778,12.4763]},
+      {name:"Via Margutta",type:"Strada",coords:[41.9074,12.4798]},
+      {name:"Villa Torlonia",type:"Parco",coords:[41.9142,12.5112]},
+      {name:"Sant'Eustachio",type:"Caffè",coords:[41.8996,12.4761]},
+      {name:"Fori Imperiali (alba)",type:"Passeggiata",coords:[41.8923,12.4853]},
+      {name:"Giardino degli Aranci",type:"Panorama",coords:[41.8817,12.4792]},
+    ]
+  },
+  { id:"rm-davide", city:"Roma", title:"Davide – Street Food & Nightlife",
+    cover:img("davide-roma"),
+    subtitle:"Food trucker e nottambulo",
+    about:"Supplì croccanti, piazze vive e birre artigianali. Roma da assaporare fino a tardi.",
+    keywords:["Street food","Nightlife","Birre","Aperitivi"],
+    center:[41.9028,12.4964],
+    poi:[
+      {name:"Trapizzino Testaccio",type:"Street food",coords:[41.8769,12.4769]},
+      {name:"Open Baladin",type:"Birreria",coords:[41.8984,12.4737]},
+      {name:"Drink Kong",type:"Cocktail",coords:[41.9000,12.4797]},
+      {name:"Pigneto",type:"Quartiere",coords:[41.8895,12.5361]},
+      {name:"Dar Poeta",type:"Pizzeria",coords:[41.8908,12.4687]},
+      {name:"San Lorenzo",type:"Zona",coords:[41.9009,12.5203]},
+      {name:"Tiberis",type:"Area estiva",coords:[41.9251,12.4677]},
+    ]
+  }
+];
 
-    function cardHtml(m){
-      return `
-      <article class="card" onclick="openModal('${m.id}')">
-        <img class="cover" src="${m.cover}" alt="${m.title}">
-        <div class="card-body">
-          <h3 class="name">${m.title}</h3>
-          <p class="subtitle">${m.subtitle}</p>
-          <div class="chips">${m.keywords.map(k=>`<span class="pill">${k}</span>`).join('')}</div>
-        </div>
-      </article>`;
-    }
+/* ---------- RENDER LISTE ---------- */
+const cardsEl = document.getElementById('cards');
+function cardHtml(m){
+  return `
+  <article class="card" onclick="openModal('${m.id}')">
+    <img class="cover" src="${m.cover}" alt="${m.title}" loading="lazy">
+    <div class="card-body">
+      <h3 class="name">${m.title}</h3>
+      <p class="subtitle">${m.subtitle}</p>
+      <div class="chips">${m.keywords.map(k=>`<span class="pill">${k}</span>`).join('')}</div>
+    </div>
+  </article>`;
+}
+function renderCards(){
+  const mi = MAPS.filter(x=>x.city==="Milano");
+  const rm = MAPS.filter(x=>x.city==="Roma");
+  cardsEl.innerHTML = `
+    <h2 class="section-title">Milano</h2>
+    <div class="grid">${mi.map(cardHtml).join('')}</div>
+    <h2 class="section-title">Roma</h2>
+    <div class="grid">${rm.map(cardHtml).join('')}</div>`;
+}
+renderCards();
 
-    function renderCards(){
-      const milano = MAPS.filter(x=>x.city==="Milano");
-      const roma = MAPS.filter(x=>x.city==="Roma");
-      cardsEl.innerHTML = `
-        <h2 class="section-title">Milano</h2>
-        <div class="grid">${milano.map(cardHtml).join('')}</div>
-        <h2 class="section-title">Roma</h2>
-        <div class="grid">${roma.map(cardHtml).join('')}</div>`;
-    }
+/* ---------- MODAL + MAP ---------- */
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modalTitle');
+const modalSubtitle = document.getElementById('modalSubtitle');
+const modalCover = document.getElementById('modalCover');
+const modalAbout = document.getElementById('modalAbout');
+const keywordsBox = document.getElementById('keywords');
+const unlockForm = document.getElementById('unlockForm');
+const emailInput = document.getElementById('email');
+const mapWrap = document.getElementById('mapWrap');
+const mapDiv = document.getElementById('map');
 
-    function openModal(id){
-      current = MAPS.find(x=>x.id===id);
-      modalTitle.textContent = current.title;
-      modalSubtitle.textContent = current.subtitle;
-      modalCover.src = current.cover;
-      modalAbout.textContent = current.about;
-      mapDiv.classList.add('hidden');
-      unlockForm.reset();
-      renderKeywords();
-      modal.style.display = 'grid';
-    }
+let current=null, mapInstance=null, markers=[];
 
-    function closeModal(){ modal.style.display='none'; }
-    document.getElementById('modalClose')?.addEventListener('click',closeModal);
-    document.getElementById('modalClose')?.addEventListener('touchstart',closeModal);
-    document.getElementById('modalClose') || (document.getElementById('modalClose')?.addEventListener('click',closeModal));
-    document.getElementById('modalClose') || document.querySelector('.close').addEventListener('click',closeModal);
+function openModal(id){
+  current = MAPS.find(x=>x.id===id);
+  modalTitle.textContent = current.title;
+  modalSubtitle.textContent = current.subtitle;
+  modalCover.src = current.cover;
+  modalAbout.textContent = current.about;
+  // keywords
+  keywordsBox.innerHTML = "";
+  current.keywords.forEach(k=>{
+    const el=document.createElement('div'); el.className='keyword'; el.textContent=k;
+    el.onclick=()=>el.classList.toggle('active');
+    keywordsBox.appendChild(el);
+  });
+  // nascondi mappa finché non sblocco
+  mapWrap.classList.add('hidden');
+  unlockForm.reset();
+  modal.style.display='grid';
+}
 
-    function renderKeywords(){
-      keywordsBox.innerHTML = "";
-      current.keywords.forEach(k=>{
-        const el = document.createElement("div");
-        el.textContent = k;
-        el.className = "keyword";
-        el.onclick = ()=>el.classList.toggle("active");
-        keywordsBox.appendChild(el);
+function closeModal(){ modal.style.display='none'; }
+document.getElementById('modalClose').addEventListener('click',closeModal);
+
+unlockForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const email = emailInput.value.trim();
+  if(!email){ alert("Inserisci un'email valida"); return; }
+
+  // opzionale: invio a endpoint
+  if(SUBMIT_ENDPOINT){
+    try{
+      await fetch(SUBMIT_ENDPOINT,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email, mapId: current.id, city: current.city, ts: Date.now(),
+          interests: Array.from(document.querySelectorAll('.keyword.active')).map(x=>x.textContent) })
       });
-    }
+    }catch(_){}
+  }
 
-    unlockForm.addEventListener('submit',e=>{
-      e.preventDefault();
-      const email = emailInput.value.trim();
-      if(!email) return alert("Inserisci un'email valida per sbloccare la mappa");
-      showMap();
-    });
+  showMap();
+});
 
-    function showMap(){
-      mapDiv.classList.remove('hidden');
-      if(!mapInstance){
-        mapInstance = L.map('map');
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInstance);
-      }
-      markers.forEach(m=>m.remove());
-      markers=[];
-      mapInstance.setView(current.center,13);
-      current.poi.forEach(p=>{
-        const mk=L.marker(p).addTo(mapInstance);
-        markers.push(mk);
-      });
-    }
+function showMap(){
+  mapWrap.classList.remove('hidden');
 
-    renderCards();
-  </script>
+  if(!mapInstance){
+    mapInstance = L.map('map');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInstance);
+  }
+  // Leaflet fix: ricalcola dimensioni dopo il reveal
+  setTimeout(()=> mapInstance.invalidateSize(), 0);
+
+  markers.forEach(m=>m.remove());
+  markers=[];
+  mapInstance.setView(current.center,13);
+
+  current.poi.forEach(p=>{
+    const mk=L.marker(p.coords).addTo(mapInstance)
+      .bindPopup(`<b>${p.name}</b><br><small>${p.type||""}</small>`);
+    markers.push(mk);
+  });
+}
+</script>
 </body>
 </html>
-
