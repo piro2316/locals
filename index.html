@@ -109,13 +109,12 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
 /* ---------- CONFIG ---------- */
 const SUBMIT_ENDPOINT = ""; // opzionale
 
-// immagini leggere (unsplash via.it) 480x300 approx
-const img = (seed) => `https://picsum.photos/seed/${encodeURIComponent(seed)}/640/400`;
+const imgPath = (name) => `covers/${name}`;
 
 const MAPS = [
   // Milano – più POI con popup
   { id:"mi-giulia", city:"Milano", title:"Giulia – Foodie & Design",
-    cover:img("giulia-milano"),
+    cover: imgPath("mi-giulia.webp"),
     subtitle:"Product designer e pasticcerie d’autore",
     about:"Pasticcerie, bookshop, cortili nascosti e caffè curati. Milano da vivere con gusto.",
     keywords:["Foodie","Design","Caffè","Brunch","Arte"],
@@ -134,7 +133,7 @@ const MAPS = [
     ]
   },
   { id:"mi-luca", city:"Milano", title:"Luca – Tech & Alternative Night",
-    cover:img("luca-milano"),
+    cover: imgPath("mi-luca.webp"),
     subtitle:"Dev by day, clubber by night",
     about:"Coworking e club nascosti tra Navigli e Isola. Milano alternativa e notturna.",
     keywords:["Nightlife","Startups","Musica","Cocktail"],
@@ -152,7 +151,7 @@ const MAPS = [
 
   // Roma
   { id:"rm-sara", city:"Roma", title:"Sara – Classici & Nascosti",
-    cover:img("sara-roma"),
+    cover: imgPath("rm-sara.webp"),
     subtitle:"Archivista e cortili segreti",
     about:"Belvederi, logge e giardini romani: una Roma lenta e fotografica.",
     keywords:["Storia","Fotografia","Giardini","Relax"],
@@ -170,7 +169,7 @@ const MAPS = [
     ]
   },
   { id:"rm-davide", city:"Roma", title:"Davide – Street Food & Nightlife",
-    cover:img("davide-roma"),
+    cover: imgPath("rm-davide.webp"),
     subtitle:"Food trucker e nottambulo",
     about:"Supplì croccanti, piazze vive e birre artigianali. Roma da assaporare fino a tardi.",
     keywords:["Street food","Nightlife","Birre","Aperitivi"],
