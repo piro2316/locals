@@ -153,6 +153,31 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
 #map{height:360px;border-radius:12px;border:1px solid var(--border)}
 .footer{margin-top:24px;color:#8a93a8;font-size:12.5px;text-align:center}
 .hidden{display:none!important}
+
+/* ---------- Responsive adjustments ---------- */
+@media (max-width: 768px){
+  .container{padding:20px 16px}
+  .header img{height:42px}
+  .badge{padding:4px 10px;font-size:12px}
+  .hero h1{font-size:26px}
+  .hero p{font-size:15px;max-width:90%}
+  .section-title{font-size:18px;margin:18px 0 10px}
+  .card{border-radius:14px}
+  .card-body{padding:10px 12px}
+  .name{font-size:15.5px}
+  .subtitle{font-size:12.5px}
+  .pill{font-size:11px;padding:4px 8px}
+  .modal{width:94%;max-height:88vh;border-radius:14px}
+  .modal img{height:180px}
+  .form{grid-template-columns:1fr;gap:6px}
+  .btn-primary{width:100%}
+  #map{height:280px}
+}
+@media (max-width: 480px){
+  .hero h1{font-size:22px}
+  .hero p{font-size:14.5px}
+  .badge{display:none}
+}
 </style>
 </head>
 <body>
@@ -392,7 +417,13 @@ function showMap(){
 
   current.poi.forEach(p=>{
     const mk=L.marker(p.coords).addTo(mapInstance)
-      .bindPopup(`<b>${p.name}</b><br><small>${p.type||""}</small>`);
+      .bindPopup(`
+        <b>${p.name}</b><br>
+        <small>${p.type||""}</small><br>
+        <a href="https://www.google.com/maps?q=${encodeURIComponent(p.name)}%20${encodeURIComponent(current.city)}" target="_blank" rel="noopener noreferrer">>
+          🌐 Apri su Google Maps
+        </a>
+      `);
     markers.push(mk);
   });
 }
