@@ -376,6 +376,16 @@ function openModal(id){
   // nascondi mappa finché non sblocco
   mapWrap.classList.add('hidden');
   unlockForm.reset();
+  
+  // se la mappa è già sbloccata, mostra subito
+  const unlocked = JSON.parse(localStorage.getItem('unlockedMaps') || '[]');
+  if(unlocked.includes(current.id)){
+    mapWrap.classList.remove('hidden');
+    showMap();
+  } else {
+    mapWrap.classList.add('hidden');
+  }
+  
   modal.style.display='grid';
 }
 
@@ -402,13 +412,19 @@ unlockForm.addEventListener('submit', async (e)=>{
 });
 
 function showMap(){
+  // salva localmente la mappa sbloccata
+  const unlocked = JSON.parse(localStorage.getItem('unlockedMaps') || '[]');
+  if(!unlocked.includes(current.id)){
+    unlocked.push(current.id);
+    localStorage.setItem('unlockedMaps', JSON.stringify(unlocked));
+  }
+
   mapWrap.classList.remove('hidden');
 
   if(!mapInstance){
     mapInstance = L.map('map');
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInstance);
   }
-  // Leaflet fix: ricalcola dimensioni dopo il reveal
   setTimeout(()=> mapInstance.invalidateSize(), 0);
 
   markers.forEach(m=>m.remove());
@@ -420,13 +436,14 @@ function showMap(){
       .bindPopup(`
         <b>${p.name}</b><br>
         <small>${p.type||""}</small><br>
-        <a href="https://www.google.com/maps?q=${encodeURIComponent(p.name)}%20${encodeURIComponent(current.city)}" target="_blank" rel="noopener noreferrer">>
+        <a href="https://www.google.com/maps?q=${encodeURIComponent(p.name)}%20${encodeURIComponent(current.city)}" target="_blank" rel="noopener noreferrer">
           🌐 Apri su Google Maps
         </a>
       `);
     markers.push(mk);
   });
 }
+  
 </script>
 </body>
 </html>
