@@ -154,6 +154,8 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
 #map{height:360px;border-radius:12px;border:1px solid var(--border)}
 .footer{margin-top:24px;color:#8a93a8;font-size:12.5px;text-align:center}
 .hidden{display:none!important}
+#placeInfo a.btn{display:inline-flex;align-items:center;gap:6px}
+#placeInfo button.btn{padding:8px 10px;border-radius:8px}
 
 /* ---------- Responsive adjustments ---------- */
 @media (max-width: 768px){
@@ -218,11 +220,40 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
 
         <form id="unlockForm" class="form">
           <input id="email" type="email" placeholder="La tua email per sbloccare la mappa" required>
-          <button type="submit" id="btnUnlock" class="btn btn-primary">Sblocca mappa</button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="priceSelect" aria-label="Prezzo fittizio">
+              <option value="0">Sblocco gratuito (test)</option>
+              <option value="10">€10</option>
+              <option value="15">€15</option>
+              <option value="20">€20</option>
+              <option value="30">€30</option>
+            </select>
+            <button type="submit" id="btnUnlock" class="btn btn-primary">Sblocca mappa</button>
+          </div>
         </form>
-
-        <div id="mapWrap" class="map-wrap hidden">
-          <div id="map"></div>
+        <div style="font-size:12px;color:#6b6b7c;margin-top:6px">
+          * Pagamento fittizio: non verrà effettuato alcun addebito — è solo una simulazione.
+        </div>
+        
+        <div id="mapWrap" class="map-wrap hidden" style="display:flex;gap:14px;align-items:flex-start">
+          <div id="map" style="flex:1;min-width:260px"></div>
+        
+          <aside id="placeInfo" style="width:320px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;display:none">
+            <h4 id="placeTitle" style="margin:0 0 6px"></h4>
+            <div id="placeType" style="font-size:13px;color:var(--muted);margin-bottom:8px"></div>
+            <div id="placeDesc" style="font-size:14px;color:var(--text);margin-bottom:12px"></div>
+            <div style="display:flex;gap:8px">
+              <a id="placeGoogle" target="_blank" rel="noopener noreferrer" class="btn"
+                 style="text-decoration:none;padding:8px 10px;border-radius:8px;background:#f4f3ff;color:var(--accent);border:1px solid var(--border)">
+                 Apri su Google Maps
+              </a>
+              <button id="startChat" class="btn"
+                 style="background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff">
+                 Avvia chat
+              </button>
+            </div>
+            <div id="chatTokensNote" style="margin-top:8px;font-size:13px;color:#6b6b7c"></div>
+          </aside>
         </div>
       </div>
     </div>
@@ -235,6 +266,20 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
 const SUBMIT_ENDPOINT = "https://formspree.io/f/xkgpbznv"; // link Formspree
 const FEEDBACK_FORM = "https://docs.google.com/forms/d/e/1FAIpQLSf0jr7X3hJ_rl4l2AREPRgW1i06N2Pgr8kg509C50HC2V0wbQ/viewform?usp=header"; // link del Google Form
 const FEEDBACK_DELAY_MS = 10000; // 1 minuto dopo lo sblocco
+
+async function trackEvent(payload){
+  if(!SUBMIT_ENDPOINT) return;
+  const body = Object.assign({ ts: Date.now() }, payload);
+  try{
+    await fetch(SUBMIT_ENDPOINT, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+  }catch(e){
+    console.warn('trackEvent failed', e);
+  }
+}
 
 const imgPath = (name) => `covers/${name}`;
 
@@ -373,6 +418,49 @@ const mapDiv = document.getElementById('map');
 
 let current=null, mapInstance=null, markers=[];
 
+const CHAT_TOKENS_KEY = 'chatTokens';
+function getChatTokens(){
+  return Number(localStorage.getItem(CHAT_TOKENS_KEY) || 3); // default 3
+}
+function setChatTokens(n){
+  localStorage.setItem(CHAT_TOKENS_KEY, String(n));
+  updateChatTokensUI();
+}
+function updateChatTokensUI(){
+  const el = document.getElementById('chatTokensNote');
+  if(!el) return;
+  const tokens = getChatTokens();
+  el.textContent = `Avvii chat disponibili: ${tokens}. (Se vuoi altri, dovrai acquistarli.)`;
+  const startBtn = document.getElementById('startChat');
+  if(startBtn) startBtn.disabled = tokens <= 0;
+}
+function attemptChat(){
+  let tokens = getChatTokens();
+  if(tokens <= 0){
+    alert('Non hai più avvii chat disponibili. Dovrai acquistarne altri.');
+    return;
+  }
+  tokens -= 1;
+  setChatTokens(tokens);
+  trackEvent({ event: 'chat_attempt', mapId: current.id, city: current.city });
+  alert('La chat con il Local non è ancora disponibile, ma sarà aggiunta presto!');
+}
+
+function showPlaceInfo(p){
+  const info = document.getElementById('placeInfo');
+  if(!info) return;
+  document.getElementById('placeTitle').textContent = p.name || '';
+  document.getElementById('placeType').textContent = p.type || '';
+  document.getElementById('placeDesc').textContent = p.desc || 'Nessuna descrizione disponibile.';
+  const googleA = document.getElementById('placeGoogle');
+  const q = encodeURIComponent(p.name + ' ' + (current ? current.city : ''));
+  googleA.href = `https://www.google.com/maps?q=${q}`;
+  googleA.onclick = function(){
+    trackEvent({event: 'google_maps_click', mapId: current.id, city: current.city, place: p.name});
+  };
+  info.style.display = 'block';
+}
+  
 function openModal(id){
   current = MAPS.find(x=>x.id===id);
   modalTitle.textContent = current.title;
@@ -398,12 +486,22 @@ function openModal(id){
   } else {
     mapWrap.classList.add('hidden');
   }
-  
+  const infoBox = document.getElementById('placeInfo');
+  if(infoBox) infoBox.style.display = 'none';
+  const priceSel = document.getElementById('priceSelect');
+  if(priceSel) priceSel.value = '0';
+  updateChatTokensUI();
+
   modal.style.display='grid';
 }
 
 function closeModal(){ modal.style.display='none'; }
 document.getElementById('modalClose').addEventListener('click',closeModal);
+document.addEventListener('click', function(e){
+  if(e.target && e.target.id === 'startChat'){
+    attemptChat();
+  }
+});
 
 unlockForm.addEventListener('submit', async (e)=>{
   e.preventDefault();
@@ -415,10 +513,19 @@ unlockForm.addEventListener('submit', async (e)=>{
     try{
       await fetch(SUBMIT_ENDPOINT,{
         method:'POST',headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email, mapId: current.id, city: current.city, ts: Date.now(),
-          interests: Array.from(document.querySelectorAll('.keyword.active')).map(x=>x.textContent) })
+        const selectedPrice = Number(document.getElementById('priceSelect')?.value || 0);
+        body: JSON.stringify({
+          event: 'unlock_map',
+          email,
+          mapId: current.id,
+          city: current.city,
+          ts: Date.now(),
+          priceSelected: selectedPrice,
+          interests: Array.from(document.querySelectorAll('.keyword.active')).map(x=>x.textContent)
+        })
       });
     }catch(_){}
+  trackEvent({ event:'unlock_map', email, mapId: current.id, city: current.city, priceSelected: selectedPrice });
   }
 
   showMap();
@@ -446,14 +553,9 @@ function showMap(){
   mapInstance.setView(current.center,13);
 
   current.poi.forEach(p=>{
-    const mk=L.marker(p.coords).addTo(mapInstance)
-      .bindPopup(`
-        <b>${p.name}</b><br>
-        <small>${p.type||""}</small><br>
-        <a href="https://www.google.com/maps?q=${encodeURIComponent(p.name)}%20${encodeURIComponent(current.city)}" target="_blank" rel="noopener noreferrer">
-          🌐 Apri su Google Maps
-        </a>
-      `);
+    const mk = L.marker(p.coords).addTo(mapInstance);
+    mk.bindPopup(`<b>${p.name}</b><br><small>${p.type||""}</small>`);
+    mk.on('click', ()=> showPlaceInfo(p));
     markers.push(mk);
   });
 }
