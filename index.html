@@ -229,6 +229,8 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
 <script>
 /* ---------- CONFIG ---------- */
 const SUBMIT_ENDPOINT = ""; // opzionale
+const FEEDBACK_FORM = "https://forms.gle/IL_TUO_LINK"; // link del Google Form
+const FEEDBACK_DELAY_MS = 10000; // 1 minuto dopo lo sblocco
 
 const imgPath = (name) => `covers/${name}`;
 
@@ -409,6 +411,7 @@ unlockForm.addEventListener('submit', async (e)=>{
   }
 
   showMap();
+  scheduleFeedback(current.id, email);
 });
 
 function showMap(){
@@ -443,7 +446,50 @@ function showMap(){
     markers.push(mk);
   });
 }
+
+function buildFeedbackUrl(mapId, email) {
+  const u = new URL(FEEDBACK_FORM);
+  u.searchParams.set("mapId", mapId);
+  u.searchParams.set("email", email || "");
+  return u.toString();
+}
+
+function scheduleFeedback(mapId, email) {
+  const k = `feedback_shown:${mapId}`;
+  if (localStorage.getItem(k)) return; // se già mostrato per quella mappa, non ripetere
+
+  setTimeout(() => {
+    const toast = document.getElementById('feedbackToast');
+    const link = document.getElementById('feedbackLink');
+    const close = document.getElementById('feedbackClose');
+    link.href = buildFeedbackUrl(mapId, email);
+    toast.style.display = 'flex';
+    close.onclick = () => {
+      toast.style.display = 'none';
+      localStorage.setItem(k, '1');
+    };
+  }, FEEDBACK_DELAY_MS);
+}
   
 </script>
+  <div id="feedbackToast" style="
+    position:fixed;left:16px;right:16px;bottom:16px;z-index:200;
+    display:none;gap:10px;align-items:center;justify-content:space-between;
+    background:#1e1b2c;color:#fff;border:1px solid #444;padding:14px 16px;
+    border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.25);">
+    <div style="font-size:15px">
+      Ti va di dirci com’è andata? Bastano 2 minuti 🙏
+    </div>
+    <div style="display:flex;gap:8px">
+      <a id="feedbackLink" target="_blank" rel="noopener"
+         style="background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:10px;font-weight:600;text-decoration:none;">
+         Apri questionario
+      </a>
+      <button id="feedbackClose"
+         style="background:transparent;color:#ddd;border:1px solid #555;padding:8px 12px;border-radius:10px;cursor:pointer">
+         Più tardi
+      </button>
+    </div>
+  </div>
 </body>
 </html>
