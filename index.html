@@ -191,12 +191,14 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
     </header>
     <section class="hero">
       <h1>Scopri le città con gli occhi di chi le vive</h1>
-      <p>Ogni mappa è curata da un Local: una persona che conosce davvero la sua città. 
-        Sblocca un profilo per scoprire i posti più autentici dove mangiare, bere e vivere come chi ci abita.</p>
+      <p>Ogni mappa è curata da un Local: una persona che conosce davvero la sua città.<br>
+        Sblocca un profilo per scoprire i posti più autentici dove mangiare, bere e vivere come chi ci abita.<br>
+        Dopo aver esplorato la mappa, apparirà anche un breve form per lasciare il tuo feedback — ci aiuta a migliorare Locals 🙏
+      </p>
     </section>
 
     <section id="cards"></section>
-    <footer class="footer">© Locals – prototipo di validazione.</footer>
+    <footer class="footer">© Locals – MVP</footer>
   </div>
 
   <!-- Modal -->
@@ -215,7 +217,7 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
         <div id="keywords" class="keywords"></div>
 
         <form id="unlockForm" class="form">
-          <input id="email" type="email" placeholder="Email per sbloccare la mappa" required>
+          <input id="email" type="email" placeholder="La tua email per sbloccare la mappa" required>
           <button type="submit" id="btnUnlock" class="btn btn-primary">Sblocca mappa</button>
         </form>
 
@@ -231,17 +233,17 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
 <script>
 /* ---------- CONFIG ---------- */
 const SUBMIT_ENDPOINT = "https://formspree.io/f/xkgpbznv"; // link Formspree
-const FEEDBACK_FORM = "https://forms.gle/IL_TUO_LINK"; // link del Google Form
+const FEEDBACK_FORM = "https://docs.google.com/forms/d/e/1FAIpQLSf0jr7X3hJ_rl4l2AREPRgW1i06N2Pgr8kg509C50HC2V0wbQ/viewform?usp=header"; // link del Google Form
 const FEEDBACK_DELAY_MS = 10000; // 1 minuto dopo lo sblocco
 
 const imgPath = (name) => `covers/${name}`;
 
 const MAPS = [
   // Milano – più POI con popup
-  { id:"mi-giulia", city:"Milano", title:"Giulia – Foodie & Design", rating: 4.6,
+  { id:"mi-giulia", city:"Milano", title:"Giulia – Foodie & Design", rating: 5.0,
     cover: imgPath("mi-giulia.webp"),
     subtitle:"Product designer e pasticcerie d’autore",
-    about:"Pasticcerie, bookshop, cortili nascosti e caffè curati. Milano da vivere con gusto.",
+    about:"Designer appassionata di pasticcerie e spazi curati. Ti guida tra caffè artigianali, brunch memorabili e cortili nascosti.",
     keywords:["Foodie","Design","Caffè","Brunch","Arte"],
     center:[45.463,9.189],
     poi:[
@@ -266,7 +268,7 @@ const MAPS = [
   { id:"mi-luca", city:"Milano", title:"Luca – Tech & Alternative Night", rating: 4.3,
     cover: imgPath("mi-luca.webp"),
     subtitle:"Dev by day, clubber by night",
-    about:"Coworking e club nascosti tra Navigli e Isola. Milano alternativa e notturna.",
+    about:"Sviluppatore di giorno, clubber di notte. Tra coworking, bar alternativi e club sotterranei: la Milano alternativa.",
     keywords:["Nightlife","Startups","Musica","Cocktail"],
     center:[45.463,9.189],
     poi:[
@@ -290,10 +292,10 @@ const MAPS = [
   },
 
   // Roma
-  { id:"rm-sara", city:"Roma", title:"Sara – Classici & Nascosti", rating: 4.8,
+  { id:"rm-sara", city:"Roma", title:"Sara – Classici & Nascosti", rating: 5.0,
     cover: imgPath("rm-sara.webp"),
     subtitle:"Archivista e cortili segreti",
-    about:"Belvederi, logge e giardini romani: una Roma lenta e fotografica.",
+    about:"Archivista e fotografa: ti porta tra belvederi, giardini e scorci fuori dal circuito turistico.",
     keywords:["Storia","Fotografia","Giardini","Relax"],
     center:[41.9028,12.4964],
     poi:[
@@ -311,7 +313,7 @@ const MAPS = [
   { id:"rm-davide", city:"Roma", title:"Davide – Street Food & Nightlife", rating: 4.2,
     cover: imgPath("rm-davide.webp"),
     subtitle:"Food trucker e nottambulo",
-    about:"Supplì croccanti, piazze vive e birre artigianali. Roma da assaporare fino a tardi.",
+    about:"Appassionato di street food e nightlife: mercati, birre artigianali e piazze vive per serate autentiche.",
     keywords:["Street food","Nightlife","Birre","Aperitivi"],
     center:[41.9028,12.4964],
     poi:[
@@ -487,7 +489,7 @@ function scheduleFeedback(mapId, email) {
     background:#1e1b2c;color:#fff;border:1px solid #444;padding:14px 16px;
     border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.25);">
     <div style="font-size:15px">
-      Ti va di dirci com’è andata? Bastano 2 minuti 🙏
+      Ti va di dirci com’è andata? Basta 1 minuto 🙏
     </div>
     <div style="display:flex;gap:8px">
       <a id="feedbackLink" target="_blank" rel="noopener"
