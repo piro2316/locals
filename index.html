@@ -108,6 +108,7 @@ body{
 .subtitle{color:var(--muted);font-size:13.5px;margin:0 0 10px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .pill{background:#f0efff;border:1px solid #e3e1ff;color:#3c3a6a;padding:5px 9px;border-radius:999px;font-size:11.5px}
+.rating{ user-select:none; line-height:1; }
 
 /* modal */
 .modal-backdrop{
@@ -189,8 +190,9 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
       <div class="badge">MVP di validazione</div>
     </header>
     <section class="hero">
-      <h1>Mappe umane per viaggiare meglio</h1>
-      <p>Leggi il profilo del Local e sblocca la mappa personalizzata inserendo la tua email.</p>
+      <h1>Scopri le città con gli occhi di chi le vive</h1>
+      <p>Ogni mappa è curata da un Local: una persona che conosce davvero la sua città. 
+        Sblocca un profilo per scoprire i posti più autentici dove mangiare, bere e vivere come chi ci abita.</p>
     </section>
 
     <section id="cards"></section>
@@ -236,7 +238,7 @@ const imgPath = (name) => `covers/${name}`;
 
 const MAPS = [
   // Milano – più POI con popup
-  { id:"mi-giulia", city:"Milano", title:"Giulia – Foodie & Design",
+  { id:"mi-giulia", city:"Milano", title:"Giulia – Foodie & Design", rating: 4.6,
     cover: imgPath("mi-giulia.webp"),
     subtitle:"Product designer e pasticcerie d’autore",
     about:"Pasticcerie, bookshop, cortili nascosti e caffè curati. Milano da vivere con gusto.",
@@ -261,7 +263,7 @@ const MAPS = [
       {name:"Gelateria Umberto",type:"Gelateria",coords:[45.461894,9.206555]}
     ]
   },
-  { id:"mi-luca", city:"Milano", title:"Luca – Tech & Alternative Night",
+  { id:"mi-luca", city:"Milano", title:"Luca – Tech & Alternative Night", rating: 4.3,
     cover: imgPath("mi-luca.webp"),
     subtitle:"Dev by day, clubber by night",
     about:"Coworking e club nascosti tra Navigli e Isola. Milano alternativa e notturna.",
@@ -288,7 +290,7 @@ const MAPS = [
   },
 
   // Roma
-  { id:"rm-sara", city:"Roma", title:"Sara – Classici & Nascosti",
+  { id:"rm-sara", city:"Roma", title:"Sara – Classici & Nascosti", rating: 4.8,
     cover: imgPath("rm-sara.webp"),
     subtitle:"Archivista e cortili segreti",
     about:"Belvederi, logge e giardini romani: una Roma lenta e fotografica.",
@@ -306,7 +308,7 @@ const MAPS = [
       {name:"Giardino degli Aranci",type:"Panorama",coords:[41.8817,12.4792]},
     ]
   },
-  { id:"rm-davide", city:"Roma", title:"Davide – Street Food & Nightlife",
+  { id:"rm-davide", city:"Roma", title:"Davide – Street Food & Nightlife", rating: 4.2,
     cover: imgPath("rm-davide.webp"),
     subtitle:"Food trucker e nottambulo",
     about:"Supplì croccanti, piazze vive e birre artigianali. Roma da assaporare fino a tardi.",
@@ -327,11 +329,18 @@ const MAPS = [
 /* ---------- RENDER LISTE ---------- */
 const cardsEl = document.getElementById('cards');
 function cardHtml(m){
+  // genera stelle visuali (es. ★★★★☆) da m.rating
+  const fullStars = Math.floor(m.rating || 4);
+  const halfStar = (m.rating && (m.rating % 1) >= 0.5) ? 1 : 0;
+  const emptyStars = 5 - fullStars - halfStar;
+  const stars = '★'.repeat(fullStars) + (halfStar ? '½' : '') + '☆'.repeat(emptyStars);
+
   return `
   <article class="card" onclick="openModal('${m.id}')">
     <img class="cover" src="${m.cover}" alt="${m.title}" loading="lazy">
     <div class="card-body">
       <h3 class="name">${m.title}</h3>
+      <div class="rating" aria-hidden="true" style="color:#f5b50a;font-size:13px;margin-bottom:4px;">${stars}</div>
       <p class="subtitle">${m.subtitle}</p>
       <div class="chips">${m.keywords.map(k=>`<span class="pill">${k}</span>`).join('')}</div>
     </div>
