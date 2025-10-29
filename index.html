@@ -509,11 +509,12 @@ unlockForm.addEventListener('submit', async (e)=>{
   if(!email){ alert("Inserisci un'email valida"); return; }
 
   // opzionale: invio a endpoint
-  if(SUBMIT_ENDPOINT){
-    try{
-      await fetch(SUBMIT_ENDPOINT,{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        const selectedPrice = Number(document.getElementById('priceSelect')?.value || 0);
+  if (SUBMIT_ENDPOINT) {
+    const selectedPrice = Number(document.getElementById('priceSelect')?.value || 0);
+    try {
+      await fetch(SUBMIT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event: 'unlock_map',
           email,
@@ -521,11 +522,11 @@ unlockForm.addEventListener('submit', async (e)=>{
           city: current.city,
           ts: Date.now(),
           priceSelected: selectedPrice,
-          interests: Array.from(document.querySelectorAll('.keyword.active')).map(x=>x.textContent)
+          interests: Array.from(document.querySelectorAll('.keyword.active')).map(x => x.textContent)
         })
       });
-    }catch(_){}
-  trackEvent({ event:'unlock_map', email, mapId: current.id, city: current.city, priceSelected: selectedPrice });
+    } catch (_) {}
+    trackEvent({ event: 'unlock_map', email, mapId: current.id, city: current.city, priceSelected: selectedPrice });
   }
 
   showMap();
