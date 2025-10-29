@@ -109,8 +109,6 @@ body{
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .pill{background:#f0efff;border:1px solid #e3e1ff;color:#3c3a6a;padding:5px 9px;border-radius:999px;font-size:11.5px}
 .rating{ user-select:none; line-height:1; }
-.price-tag{font-weight:700;color:#7c7aac;margin-top:4px;font-size:14px;}
-.unlock-note{font-size:12px;color:#6b6b7c;margin-top:2px;}
 
 /* modal */
 .modal-backdrop{
@@ -129,6 +127,7 @@ body{
   display:flex;
   flex-direction:column;
   max-height:90vh;
+  position:relative;
 }
 .modal-head{
   padding:12px 16px;
@@ -148,18 +147,15 @@ body{
 .keywords{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
 .keyword{padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fafaff;font-size:12.5px;cursor:pointer}
 .keyword.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.form{display:flex;flex-direction:column;gap:8px;margin:8px 0 0}
+.form{display:flex;gap:8px;align-items:center;margin:8px 0 0}
 input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:10px;font-size:14.5px;width:100%}
 .btn{padding:10px 12px;border-radius:10px;font-weight:700;cursor:pointer}
 .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#fff}
-.map-wrap{margin-top:12px;display:flex;gap:14px;align-items:flex-start}
+.map-wrap{margin-top:12px;display:flex;gap:14px;align-items:flex-start;position:relative}
 #map{height:360px;border-radius:12px;border:1px solid var(--border);flex:1}
-#placeInfo{width:320px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;display:none}
-#placeInfo h4{margin:0 0 6px;font-size:16px;font-weight:700}
-#placeInfo .btn{padding:8px 10px;border-radius:8px;font-weight:600;cursor:pointer;text-decoration:none;text-align:center}
-.chat-section{margin-top:12px;display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:14px}
 .footer{margin-top:24px;color:#8a93a8;font-size:12.5px;text-align:center}
 .hidden{display:none!important}
+#placeInfo a.btn,#placeInfo button.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:8px}
 
 /* ---------- Responsive adjustments ---------- */
 @media (max-width: 768px){
@@ -176,10 +172,9 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
   .pill{font-size:11px;padding:4px 8px}
   .modal{width:94%;max-height:88vh;border-radius:14px}
   .modal img{height:180px}
-  .form{grid-template-columns:1fr;gap:6px}
+  .form{flex-direction:column;gap:6px}
   .btn-primary{width:100%}
   #map{height:280px}
-  #placeInfo{width:200px;font-size:13px}
 }
 @media (max-width: 480px){
   .hero h1{font-size:22px}
@@ -223,28 +218,43 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
         <p id="modalAbout" class="about"></p>
         <div id="keywords" class="keywords"></div>
 
+        <!-- Form email + sblocca + prezzo -->
         <form id="unlockForm" class="form">
           <input id="email" type="email" placeholder="La tua email per sbloccare la mappa" required>
-          <button type="submit" id="btnUnlock" class="btn btn-primary">Sblocca mappa</button>
-          <div class="unlock-note">* Pagamento fittizio, non verrà effettuato alcun addebito.</div>
-          <div id="fixedPrice" class="price-tag"></div>
+          <button type="submit" class="btn btn-primary">Sblocca mappa</button>
+          <div style="display:flex;flex-direction:column;align-items:center;font-size:12px;margin-top:4px;">
+            <div id="modalPrice">€0</div>
+            <div style="color:#6b6b7c">Prezzo fittizio, non verrà effettuato alcun addebito.</div>
+          </div>
         </form>
 
-        <div class="chat-section hidden">
-          <button id="startChat" class="btn btn-primary">Avvia chat</button>
-          <span id="chatTokensNote"></span>
-          <button id="buyChatTokens" class="btn" style="background:#f4f3ff;color:var(--accent);border:1px solid var(--border)">Acquista +5 chat (fittizio)</button>
+        <div id="chatSection" style="margin-top:12px; display:none;">
+          <button id="startChat" class="btn btn-primary" style="padding:12px 16px;font-weight:700;font-size:15px;display:block; margin-bottom:4px;">
+            💬 Avvia chat
+          </button>
+          <div id="chatTokensNote" style="display:inline-block;padding:6px 10px;background:#f0efff;border-radius:12px;font-weight:600;color:#3c3a6a">
+            Chat disponibili: <span id="chatTokensNumber">3</span>
+          </div>
+          <button id="buyChatTokens" class="btn btn-primary" style="margin-top:6px;">
+            Acquista +5 chat
+          </button>
+          <div style="font-size:12px;color:#6b6b7c; margin-top:2px;">
+            Non verrà effettuato alcun pagamento, solo test fittizio.
+          </div>
         </div>
 
-        <div id="mapWrap" class="map-wrap hidden">
+        <!-- Map + Box info -->
+        <div class="map-wrap">
           <div id="map"></div>
-          <aside id="placeInfo">
+          <div id="placeInfo" style="position:absolute;top:16px;right:16px;width:280px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;display:none;z-index:150;">
+            <button id="placeInfoClose" style="float:right;border:none;background:none;cursor:pointer">✕</button>
             <h4 id="placeTitle"></h4>
-            <div id="placeType" style="color:var(--muted);margin-bottom:4px"></div>
-            <div id="placeDesc" style="color:var(--text);margin-bottom:12px"></div>
-            <a id="placeGoogle" target="_blank" rel="noopener noreferrer" class="btn"
-               style="background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff">Apri Google Maps</a>
-          </aside>
+            <div id="placeType" style="font-size:13px;color:var(--muted)"></div>
+            <div id="placeDesc" style="font-size:14px;color:var(--text);margin-bottom:8px"></div>
+            <a id="placeGoogle" target="_blank" rel="noopener" class="btn" style="background:#f4f3ff;color:var(--accent);border:1px solid var(--border);padding:6px 10px;border-radius:8px;text-decoration:none;">
+              Apri Google Maps
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -252,11 +262,14 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
 <script>
+// --- CONFIG ---
 const SUBMIT_ENDPOINT = "https://formspree.io/f/xkgpbznv";
 const FEEDBACK_FORM = "https://docs.google.com/forms/d/e/1FAIpQLSf0jr7X3hJ_rl4l2AREPRgW1i06N2Pgr8kg509C50HC2V0wbQ/viewform?usp=header";
 const FEEDBACK_DELAY_MS = 10000;
 
+// --- TRACK EVENT ---
 async function trackEvent(payload){
   if(!SUBMIT_ENDPOINT) return;
   const body = Object.assign({ ts: Date.now() }, payload);
@@ -266,11 +279,15 @@ async function trackEvent(payload){
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify(body)
     });
-  }catch(e){ console.warn('trackEvent failed', e); }
+  }catch(e){
+    console.warn('trackEvent failed', e);
+  }
 }
 
+// --- PATH IMMAGINI ---
 const imgPath = (name) => `covers/${name}`;
 
+// --- MAPS DATA ---
 const MAPS = [
   // Milano – più POI con popup
   { id:"mi-giulia", city:"Milano", title:"Giulia – Foodie & Design", rating: 5.0,
@@ -359,26 +376,24 @@ const MAPS = [
   }
 ];
 
-/* ---------- CARD RENDER ---------- */
+// --- RENDER CARDS ---
 const cardsEl = document.getElementById('cards');
 function cardHtml(m){
-  const fullStars = Math.floor(m.rating || 4);
-  const halfStar = (m.rating % 1)>=0.5?1:0;
-  const emptyStars = 5-fullStars-halfStar;
-  const stars='★'.repeat(fullStars)+(halfStar?'½':'')+'☆'.repeat(emptyStars);
-  return `<article class="card" onclick="openModal('${m.id}')">
+  return `
+  <article class="card" onclick="openModal('${m.id}')">
     <img class="cover" src="${m.cover}" alt="${m.title}" loading="lazy">
     <div class="card-body">
       <h3 class="name">${m.title}</h3>
-      <div class="rating" aria-hidden="true" style="color:#f5b50a;font-size:13px;margin-bottom:4px;">${stars}</div>
+      <div class="rating" aria-hidden="true" style="color:#f5b50a;font-size:13px;">★ ★ ★ ★ ★</div>
       <p class="subtitle">${m.subtitle}</p>
       <div class="chips">${m.keywords.map(k=>`<span class="pill">${k}</span>`).join('')}</div>
+      <div style="margin-top:6px;font-size:14px;color:#555;">Prezzo: €${m.price} (fittizio)</div>
     </div>
   </article>`;
 }
 function renderCards(){
-  const mi=MAPS.filter(x=>x.city==="Milano");
-  const rm=MAPS.filter(x=>x.city==="Roma");
+  const mi = MAPS.filter(x=>x.city==="Milano");
+  const rm = MAPS.filter(x=>x.city==="Roma");
   cardsEl.innerHTML = `
     <h2 class="section-title">Milano</h2>
     <div class="grid">${mi.map(cardHtml).join('')}</div>
@@ -387,144 +402,116 @@ function renderCards(){
 }
 renderCards();
 
-/* ---------- MODAL + MAP + CHAT ---------- */
-const modal=document.getElementById('modal');
-const modalTitle=document.getElementById('modalTitle');
-const modalSubtitle=document.getElementById('modalSubtitle');
-const modalCover=document.getElementById('modalCover');
-const modalAbout=document.getElementById('modalAbout');
-const keywordsBox=document.getElementById('keywords');
-const unlockForm=document.getElementById('unlockForm');
-const emailInput=document.getElementById('email');
-const mapWrap=document.getElementById('mapWrap');
-const mapDiv=document.getElementById('map');
-const fixedPriceEl=document.getElementById('fixedPrice');
-const chatSection=document.querySelector('.chat-section');
-const startChatBtn=document.getElementById('startChat');
-const chatTokensNote=document.getElementById('chatTokensNote');
-const buyChatTokensBtn=document.getElementById('buyChatTokens');
+// --- MODAL & MAP ---
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modalTitle');
+const modalSubtitle = document.getElementById('modalSubtitle');
+const modalCover = document.getElementById('modalCover');
+const modalAbout = document.getElementById('modalAbout');
+const keywordsBox = document.getElementById('keywords');
+const unlockForm = document.getElementById('unlockForm');
+const emailInput = document.getElementById('email');
+const mapWrap = document.getElementById('mapWrap');
+const mapDiv = document.getElementById('map');
+const modalPrice = document.getElementById('modalPrice');
+const chatSection = document.getElementById('chatSection');
+const chatTokensNumber = document.getElementById('chatTokensNumber');
 
 let current=null, mapInstance=null, markers=[];
 
-/* ---------- CHAT TOKENS ---------- */
+// CHAT TOKENS
 const CHAT_TOKENS_KEY='chatTokens';
-function getChatTokens(){ return Number(localStorage.getItem(CHAT_TOKENS_KEY)||3); }
-function setChatTokens(n){ localStorage.setItem(CHAT_TOKENS_KEY,n); updateChatTokensUI(); }
-function updateChatTokensUI(){
-  chatTokensNote.textContent=`Avvii chat disponibili: ${getChatTokens()}.`;
-  startChatBtn.disabled = getChatTokens()<=0;
-}
-function attemptChat(){
-  let tokens = getChatTokens();
-  if(tokens<=0){ alert("Non hai più avvii chat disponibili."); return; }
-  setChatTokens(tokens-1);
-  trackEvent({event:'chat_attempt',mapId:current.id,city:current.city});
-  alert('La chat con il Local non è ancora disponibile, ma sarà aggiunta presto!');
-}
-function buyChatTokens(){
-  setChatTokens(getChatTokens()+5);
-  alert('Hai aggiunto 5 avvii chat fittizi. (Tracciato per test)');
-  trackEvent({event:'chat_purchase',mapId:current.id,city:current.city});
-}
+if(!localStorage.getItem(CHAT_TOKENS_KEY)) localStorage.setItem(CHAT_TOKENS_KEY,'3');
+function getChatTokens(){ return Number(localStorage.getItem(CHAT_TOKENS_KEY)); }
+function setChatTokens(n){ localStorage.setItem(CHAT_TOKENS_KEY,String(n)); updateChatUI(); }
+function updateChatUI(){ chatTokensNumber.textContent=getChatTokens(); }
 
-startChatBtn.addEventListener('click',attemptChat);
-buyChatTokensBtn.addEventListener('click',buyChatTokens);
-
-/* ---------- PLACE INFO ---------- */
-const placeInfo=document.getElementById('placeInfo');
-function showPlaceInfo(p){
-  document.getElementById('placeTitle').textContent=p.name||'';
-  document.getElementById('placeType').textContent=p.type||'';
-  document.getElementById('placeDesc').textContent=p.desc||'Nessuna descrizione disponibile.';
-  const googleA=document.getElementById('placeGoogle');
-  const q=encodeURIComponent(p.name+' '+(current?current.city:''));
-  googleA.href=`https://www.google.com/maps?q=${q}`;
-  googleA.onclick=function(){ trackEvent({event:'google_maps_click',mapId:current.id,city:current.city,place:p.name}); };
-  placeInfo.style.display='block';
-}
-
-/* ---------- MODAL OPEN/CLOSE ---------- */
+// OPEN MODAL
 function openModal(id){
-  current=MAPS.find(x=>x.id===id);
+  current = MAPS.find(x=>x.id===id);
   modalTitle.textContent=current.title;
   modalSubtitle.textContent=current.subtitle;
   modalCover.src=current.cover;
   modalAbout.textContent=current.about;
-  keywordsBox.innerHTML='';
+  modalPrice.textContent=`€${current.price}`;
+  keywordsBox.innerHTML="";
   current.keywords.forEach(k=>{
     const el=document.createElement('div'); el.className='keyword'; el.textContent=k;
     el.onclick=()=>el.classList.toggle('active');
     keywordsBox.appendChild(el);
   });
 
-  mapWrap.classList.add('hidden');
-  chatSection.classList.add('hidden');
-  fixedPriceEl.textContent=`Prezzo fittizio: €${current.price}`;
-
-  unlockForm.reset();
-  placeInfo.style.display='none';
-  updateChatTokensUI();
-  modal.style.display='grid';
-
-  // se già sbloccata
-  const unlocked=JSON.parse(localStorage.getItem('unlockedMaps')||'[]');
+  const unlocked = JSON.parse(localStorage.getItem('unlockedMaps')||'[]');
   if(unlocked.includes(current.id)){
+    mapWrap.classList.remove('hidden');
+    chatSection.style.display='block';
     showMap();
-    chatSection.classList.remove('hidden');
+  } else {
+    mapWrap.classList.add('hidden');
+    chatSection.style.display='none';
   }
+
+  const placeInfo=document.getElementById('placeInfo');
+  placeInfo.style.display='none';
+  unlockForm.reset();
+
+  modal.style.display='grid';
 }
-function closeModal(){ modal.style.display='none'; }
-document.getElementById('modalClose').addEventListener('click',closeModal);
 
-/* ---------- UNLOCK FORM ---------- */
-unlockForm.addEventListener('submit', async e=>{
+// CLOSE MODAL
+document.getElementById('modalClose').addEventListener('click',()=>modal.style.display='none');
+
+// PLACE INFO CLOSE
+document.getElementById('placeInfoClose').addEventListener('click',()=>{document.getElementById('placeInfo').style.display='none';});
+
+// START CHAT
+document.getElementById('startChat').addEventListener('click',()=>{
+  let t=getChatTokens();
+  if(t<=0){ alert("Non hai chat disponibili. Acquistane altre."); return; }
+  t--; setChatTokens(t);
+  trackEvent({event:'chat_attempt',mapId:current.id,city:current.city});
+  alert("Chat simulata! Non disponibile ancora.");
+});
+
+// BUY CHAT
+document.getElementById('buyChatTokens').addEventListener('click',()=>{
+  let t=getChatTokens();
+  t+=5; setChatTokens(t);
+  trackEvent({event:'buy_chat_tokens',mapId:current.id,city:current.city});
+  alert("Hai ricevuto 5 chat aggiuntive (simulazione).");
+});
+
+// UNLOCK FORM
+unlockForm.addEventListener('submit',async e=>{
   e.preventDefault();
-  const email=emailInput.value.trim();
-  if(!email){ alert("Inserisci un'email valida"); return; }
+  const email=emailInput.value.trim(); if(!email){ alert("Email mancante"); return; }
+  const unlocked=JSON.parse(localStorage.getItem('unlockedMaps')||'[]');
+  if(!unlocked.includes(current.id)){
+    unlocked.push(current.id); localStorage.setItem('unlockedMaps',JSON.stringify(unlocked));
+  }
+  mapWrap.classList.remove('hidden'); chatSection.style.display='block';
+  const selectedPrice=current.price;
 
-  // invio Formspree
-  try{
+  // track unlock
+  if(SUBMIT_ENDPOINT){
     await fetch(SUBMIT_ENDPOINT,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        event:'unlock_map',
-        email,
-        mapId:current.id,
-        city:current.city,
-        ts:Date.now(),
-        pricePaid:current.price,
-        interests:Array.from(document.querySelectorAll('.keyword.active')).map(x=>x.textContent)
-      })
+      body:JSON.stringify({event:'unlock_map',email,mapId:current.id,city:current.city,price:selectedPrice})
     });
-  }catch(_){}
-  trackEvent({event:'unlock_map',email,mapId:current.id,city:current.city,pricePaid:current.price});
-
-  // salva localmente
-  const unlocked=JSON.parse(localStorage.getItem('unlockedMaps')||'[]');
-  if(!unlocked.includes(current.id)){
-    unlocked.push(current.id);
-    localStorage.setItem('unlockedMaps',JSON.stringify(unlocked));
   }
 
   showMap();
-  chatSection.classList.remove('hidden');
-  scheduleFeedback(current.id,email);
 });
 
-/* ---------- MAP ---------- */
+// SHOW MAP
 function showMap(){
-  mapWrap.classList.remove('hidden');
   if(!mapInstance){
-    mapInstance=L.map('map');
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInstance);
+    mapInstance=L.map('map'); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInstance);
   }
   setTimeout(()=>mapInstance.invalidateSize(),0);
-
-  markers.forEach(m=>m.remove());
-  markers=[];
+  markers.forEach(m=>m.remove()); markers=[];
   mapInstance.setView(current.center,13);
-
   current.poi.forEach(p=>{
     const mk=L.marker(p.coords).addTo(mapInstance);
     mk.bindPopup(`<b>${p.name}</b><br><small>${p.type||""}</small>`);
@@ -533,42 +520,18 @@ function showMap(){
   });
 }
 
-/* ---------- FEEDBACK ---------- */
-function buildFeedbackUrl(mapId,email){ 
-  const u=new URL(FEEDBACK_FORM); u.searchParams.set("mapId",mapId); u.searchParams.set("email",email||""); return u.toString();
+// SHOW PLACE INFO
+function showPlaceInfo(p){
+  const info=document.getElementById('placeInfo');
+  document.getElementById('placeTitle').textContent=p.name||'';
+  document.getElementById('placeType').textContent=p.type||'';
+  document.getElementById('placeDesc').textContent=p.desc||'Nessuna descrizione.';
+  const googleA=document.getElementById('placeGoogle');
+  googleA.href=`https://www.google.com/maps?q=${encodeURIComponent(p.name+' '+current.city)}`;
+  googleA.onclick=()=>trackEvent({event:'google_maps_click',mapId:current.id,city:current.city,place:p.name});
+  info.style.display='block';
 }
-function scheduleFeedback(mapId,email){
-  const k=`feedback_shown:${mapId}`;
-  if(localStorage.getItem(k)) return;
-  setTimeout(()=>{
-    const toast=document.getElementById('feedbackToast');
-    const link=document.getElementById('feedbackLink');
-    const close=document.getElementById('feedbackClose');
-    link.href=buildFeedbackUrl(mapId,email);
-    toast.style.display='flex';
-    close.onclick=()=>{ toast.style.display='none'; localStorage.setItem(k,'1'); };
-  },FEEDBACK_DELAY_MS);
-}
+
 </script>
-
-<!-- Feedback toast -->
-<div id="feedbackToast" style="
-    position:fixed;left:16px;right:16px;bottom:16px;z-index:200;
-    display:none;gap:10px;align-items:center;justify-content:space-between;
-    background:#1e1b2c;color:#fff;border:1px solid #444;padding:14px 16px;
-    border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.25);">
-    <div style="font-size:15px">Ti va di dirci com’è andata? Basta 1 minuto 🙏</div>
-    <div style="display:flex;gap:8px">
-      <a id="feedbackLink" target="_blank" rel="noopener"
-         style="background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:10px;font-weight:600;text-decoration:none;">
-         Apri questionario
-      </a>
-      <button id="feedbackClose"
-         style="background:transparent;color:#ddd;border:1px solid #555;padding:8px 12px;border-radius:10px;cursor:pointer">
-         Più tardi
-      </button>
-    </div>
-</div>
-
 </body>
 </html>
