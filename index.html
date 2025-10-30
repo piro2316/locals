@@ -7,91 +7,105 @@
 <meta name="description" content="Profili Local per Milano e Roma. Sblocca la mappa inserendo la tua email.">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <style>
-:root{ --bg:#f7f7fa; --text:#1b1b24; --muted:#676a7e; --accent:#7c7aac; --accent2:#a29fe2; --border:#e3e4ef; --card:#ffffff; --shadow:rgba(124,122,172,0.1); }
-*{box-sizing:border-box} 
-body{ margin:0; background:var(--bg); color:var(--text); font:16px/1.6 "Inter", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif; }
+:root{
+  --bg:#f7f7fa; --text:#1b1b24; --muted:#676a7e;
+  --accent:#7c7aac; --accent2:#a29fe2;
+  --border:#e3e4ef; --card:#ffffff;
+  --shadow:rgba(124,122,172,0.1);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font:16px/1.6 "Inter", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif;
+}
 
 /* Container */
 .container{max-width:1100px;margin:auto;padding:32px 24px}
 
 /* Header */
-.header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; }
-.header img{ height:52px; filter:drop-shadow(0 2px 4px var(--shadow)); }
-.badge{ border:1px solid var(--border); background:linear-gradient(135deg,var(--accent2)10%,var(--accent)90%); color:#fff; padding:6px 14px; border-radius:999px; font-size:13px; font-weight:600; letter-spacing:.2px; }
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;}
+.header img{height:52px;filter:drop-shadow(0 2px 4px var(--shadow));}
+.badge{border:1px solid var(--border);background:linear-gradient(135deg,var(--accent2)10%,var(--accent)90%);
+color:#fff;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;letter-spacing:.2px;}
 
 /* Hero */
-.hero{ margin:32px 0; text-align:center; }
-.hero h1{ margin:0 0 10px; font-size:34px; font-weight:800; color:var(--accent); background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-.hero p{ margin:0 auto; color:var(--muted); max-width:720px; font-size:17px; }
+.hero{text-align:center;margin:32px 0;}
+.hero h1{margin:0 0 10px;font-size:34px;font-weight:800;color:var(--accent);
+background:linear-gradient(90deg,var(--accent),var(--accent2));
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p{margin:0 auto;color:var(--muted);max-width:720px;font-size:17px;}
 
 /* Section titles */
-.section-title{ margin:26px 0 14px; font-size:21px; font-weight:700; color:var(--accent); }
+.section-title{margin:26px 0 14px;font-size:21px;font-weight:700;color:var(--accent);}
 
 /* Cards */
-.grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
-.card{ background:var(--card); border:1px solid var(--border); border-radius:18px; overflow:hidden; cursor:pointer; box-shadow:0 4px 8px var(--shadow); transition:transform .15s ease, box-shadow .15s ease; position:relative; }
-.card:hover{ transform:translateY(-3px); box-shadow:0 10px 22px rgba(124,122,172,0.15); }
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;cursor:pointer;
+box-shadow:0 4px 8px var(--shadow);transition:transform .15s ease, box-shadow .15s ease;position:relative;}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(124,122,172,0.15);}
 .cover{width:100%;height:220px;object-fit:cover;display:block}
 .card-body{padding:14px 16px}
 .name{font-weight:700;margin:0 0 4px;font-size:17px}
 .subtitle{color:var(--muted);font-size:13.5px;margin:0 0 10px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .pill{background:#f0efff;border:1px solid #e3e1ff;color:#3c3a6a;padding:5px 9px;border-radius:999px;font-size:11.5px}
-.rating{ user-select:none; line-height:1; margin-bottom:6px; }
+.rating{user-select:none;line-height:1;margin-bottom:6px;}
 
 /* Price badge */
-.price-badge{ position:absolute; top:10px; right:10px; background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; padding:4px 10px; border-radius:999px; font-weight:600; font-size:13px; }
+.price-badge{
+  position:absolute;top:10px;right:10px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  color:#fff;padding:4px 10px;border-radius:999px;font-weight:600;font-size:13px;
+}
 
 /* Modal */
-.modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; place-items:center; z-index:100; }
-.modal{ width:min(760px,96%); background:#fff; border-radius:16px; overflow:hidden; display:flex; flex-direction:column; max-height:90vh; }
-.modal-head{ padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:#f4f3ff; }
-.modal-title{font-weight:800}
-.modal-sub{font-size:12.5px;color:#6a6f82}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);
+display:none;place-items:center;z-index:100;}
+.modal{width:min(760px,96%);background:#fff;border-radius:16px;overflow:hidden;
+display:flex;flex-direction:column;max-height:90vh;}
+.modal-head{padding:12px 16px;border-bottom:1px solid var(--border);
+display:flex;justify-content:space-between;align-items:center;background:#f4f3ff;}
+.modal-title{font-weight:800}.modal-sub{font-size:12.5px;color:#6a6f82}
 .close{cursor:pointer;font-size:18px;border:none;background:none;color:#666;line-height:1}
 .close:hover{color:var(--accent)}
 .modal-body{padding:14px 16px;overflow:auto}
 .modal img{width:100%;height:220px;border-radius:12px;object-fit:cover}
 .about{margin:10px 0 10px}
 .keywords{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
-.keyword{padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#fafaff;font-size:12.5px;cursor:pointer}
+.keyword{padding:6px 10px;border-radius:999px;border:1px solid var(--border);
+background:#fafaff;font-size:12.5px;cursor:pointer}
 .keyword.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .form{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin:8px 0 0}
-input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:10px;font-size:14.5px;width:100%}
+input[type=email]{padding:9px 10px;border:1px solid var(--border);
+border-radius:10px;font-size:14.5px;width:100%}
 .btn{padding:10px 12px;border-radius:10px;font-weight:700;cursor:pointer}
 .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#fff}
 #map{height:360px;border-radius:12px;border:1px solid var(--border)}
-#placeInfo{ position:absolute; top:0; right:0; width:320px; background:#fff; border:1px solid var(--border); border-radius:12px; padding:12px; display:none; z-index:150; }
-#placeInfo h4{ margin:0 0 6px; }
-#placeInfo .close-info{ cursor:pointer; font-size:14px; color:#666; text-align:right; margin-bottom:6px;}
-#placeInfo .close-info:hover{color:var(--accent);}
-#chatControls{ display:flex; gap:10px; align-items:center; margin-top:10px; }
-#chatCounter{ font-weight:700; padding:4px 10px; border-radius:12px; background:#f0efff; }
-#buyChatBtn{ padding:4px 10px; border-radius:12px; border:none; background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; cursor:pointer; font-weight:600; }
 
-/* Responsive adjustments */
-@media (max-width: 768px){ 
-  .container{padding:20px 16px} 
-  .header img{height:42px} 
-  .badge{padding:4px 10px;font-size:12px} 
-  .hero h1{font-size:26px} 
-  .hero p{font-size:15px;max-width:90%} 
-  .section-title{font-size:18px;margin:18px 0 10px} 
-  .card{border-radius:14px} 
-  .card-body{padding:10px 12px} 
-  .name{font-size:15.5px} 
-  .subtitle{font-size:12.5px} 
-  .pill{font-size:11px;padding:4px 8px} 
-  .modal{width:94%;max-height:88vh;border-radius:14px} 
-  .modal img{height:180px} 
-  .form{grid-template-columns:1fr;gap:6px} 
-  .btn-primary{width:100%} 
-  #map{height:280px} 
+/* Place info */
+#placeInfo{
+  width:100%;background:#fff;border:1px solid var(--border);
+  border-radius:12px;padding:12px;display:none;margin-top:12px;
 }
-@media (max-width: 480px){ 
-  .hero h1{font-size:22px} 
-  .hero p{font-size:14.5px} 
-  .badge{display:none} 
+#placeInfo h4{margin:0 0 6px;}
+#placeInfo .close-info{cursor:pointer;font-size:14px;color:#666;text-align:right;margin-bottom:6px;}
+#placeInfo .close-info:hover{color:var(--accent);}
+
+/* Chat controls */
+#chatControls{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;}
+#chatCounter{font-weight:700;padding:4px 10px;border-radius:12px;background:#f0efff;}
+#buyChatBtn{padding:4px 10px;border-radius:12px;border:none;
+background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor:pointer;font-weight:600;}
+
+/* Responsive */
+@media (max-width:768px){
+  .container{padding:20px 16px}
+  .header img{height:42px}
+  .hero h1{font-size:26px}
+  .hero p{font-size:15px;max-width:90%}
+  .section-title{font-size:18px;margin:18px 0 10px}
+  .modal img{display:none}
+  #map{height:280px}
 }
 </style>
 </head>
@@ -103,14 +117,19 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
     </div>
     <div class="badge">MVP di validazione</div>
   </header>
+
   <section class="hero">
     <h1>Scopri le città con gli occhi di chi le vive</h1>
     <p>Ogni mappa è curata da un Local: una persona che conosce davvero la sua città.<br>
     Sblocca un profilo per scoprire i posti più autentici.<br>
     Dopo aver esplorato la mappa, apparirà anche un breve form per lasciare il tuo feedback!</p>
   </section>
+
   <section id="cards"></section>
-  <footer class="footer">© Locals – MVP</footer>
+
+  <footer class="footer" style="margin-top:24px;color:#8a93a8;font-size:12.5px;text-align:center">
+    © Locals – MVP
+  </footer>
 </div>
 
 <!-- Modal -->
@@ -123,6 +142,7 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
       </div>
       <button id="modalClose" class="close" aria-label="Chiudi">✕</button>
     </div>
+
     <div class="modal-body">
       <img id="modalCover" src="" alt="" loading="lazy">
       <p id="modalAbout" class="about"></p>
@@ -143,16 +163,16 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);border-radius:
         <div style="font-size:12px;color:#6b6b7c;">* Fittizio, nessun addebito reale</div>
       </div>
 
-      <div id="mapWrap" class="map-wrap" style="display:flex;gap:14px;align-items:flex-start">
-        <div id="map" style="flex:1;min-width:260px"></div>
+      <div id="mapWrap" class="map-wrap" style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">
+        <div id="map" style="width:100%"></div>
         <aside id="placeInfo">
           <div class="close-info" id="closePlaceInfo">✕ Chiudi</div>
           <h4 id="placeTitle"></h4>
           <div id="placeType" style="font-size:13px;color:var(--muted);margin-bottom:8px"></div>
           <div id="placeDesc" style="font-size:14px;color:var(--text);margin-bottom:12px"></div>
-          <div style="display:flex;gap:8px">
-            <a id="placeGoogle" target="_blank" rel="noopener noreferrer" class="btn" style="text-decoration:none;padding:8px 10px;border-radius:8px;background:#f4f3ff;color:#7c7aac;border:1px solid var(--border)">Apri su Google Maps</a>
-          </div>
+          <a id="placeGoogle" target="_blank" rel="noopener noreferrer"
+             class="btn" style="text-decoration:none;padding:8px 10px;border-radius:8px;background:#f4f3ff;
+             color:#7c7aac;border:1px solid var(--border)">Apri su Google Maps</a>
         </aside>
       </div>
     </div>
@@ -166,31 +186,32 @@ const SUBMIT_ENDPOINT = "https://formspree.io/f/xkgpbznv";
 const FEEDBACK_FORM = "https://docs.google.com/forms/d/e/1FAIpQLSf0jr7X3hJ_rl4l2AREPRgW1i06N2Pgr8kg509C50HC2V0wbQ/viewform?usp=header";
 const FEEDBACK_DELAY_MS = 10000;
 
-/* Chat tokens */
+/* ---------- CHAT TOKENS ---------- */
 const CHAT_TOKENS_KEY = 'chatTokens';
 if(localStorage.getItem(CHAT_TOKENS_KEY)===null) localStorage.setItem(CHAT_TOKENS_KEY,'3');
-
-function getChatTokens(){ return Number(localStorage.getItem(CHAT_TOKENS_KEY) || 3); }
+function getChatTokens(){ return Number(localStorage.getItem(CHAT_TOKENS_KEY)||3); }
 function setChatTokens(n){ localStorage.setItem(CHAT_TOKENS_KEY,String(n)); updateChatUI(); }
 function updateChatUI(){
-  const counter = document.getElementById('chatCounter');
-  const startBtn = document.getElementById('startChat');
-  const controls = document.getElementById('chatControls');
-  const tokens = getChatTokens();
-  counter.textContent = tokens;
-  startBtn.disabled = tokens<=0;
-  controls.style.display = startBtn.disabled ? 'none' : 'flex';
+  const counter=document.getElementById('chatCounter');
+  const startBtn=document.getElementById('startChat');
+  const controls=document.getElementById('chatControls');
+  const tokens=getChatTokens();
+  counter.textContent=`Avvii disponibili: ${tokens}`;
+  startBtn.disabled=tokens<=0;
+  controls.style.display='flex';
 }
+
+/* ---------- TRACKING ---------- */
 function trackEvent(payload){
   if(!SUBMIT_ENDPOINT) return;
-  const body = Object.assign({ts:Date.now()},payload);
-  fetch(SUBMIT_ENDPOINT,{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)}).catch(()=>{});
+  fetch(SUBMIT_ENDPOINT,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(Object.assign({ts:Date.now()},payload))
+  }).catch(()=>{});
 }
 
-// --- PATH IMMAGINI ---
+/* ---------- DATA ---------- */
 const imgPath = (name) => `covers/${name}`;
-
-// --- MAPS DATA ---
 const MAPS = [
   // Milano – più POI con popup
   { id:"mi-giulia", city:"Milano", title:"Giulia – Foodie & Design", rating: 5.0,
@@ -280,93 +301,75 @@ const MAPS = [
 ];
 
 /* ---------- RENDER CARDS ---------- */
-const cardsEl = document.getElementById('cards');
+const cardsEl=document.getElementById('cards');
 function cardHtml(m){
-  const fullStars = Math.floor(m.rating||0);
-  const halfStar = (m.rating%1>=0.5)?1:0;
-  const emptyStars = 5-fullStars-halfStar;
-  const stars = '★'.repeat(fullStars) + (halfStar?'½':'') + '☆'.repeat(emptyStars);
+  const stars='★'.repeat(Math.floor(m.rating||0))+'☆'.repeat(5-Math.floor(m.rating||0));
   return `<article class="card" onclick="openModal('${m.id}')">
-    <img class="cover" src="${m.cover}" alt="${m.title}" loading="lazy">
+    <img class="cover" src="${m.cover}" alt="${m.title}">
     <div class="price-badge">${m.price}€</div>
     <div class="card-body">
       <h3 class="name">${m.title}</h3>
-      <div class="rating" aria-hidden="true" style="color:#f5b50a;font-size:13px;margin-bottom:4px;">${stars}</div>
+      <div class="rating" style="color:#f5b50a;font-size:13px;">${stars}</div>
       <p class="subtitle">${m.subtitle}</p>
       <div class="chips">${m.keywords.map(k=>`<span class="pill">${k}</span>`).join('')}</div>
-    </div>
-  </article>`;
+    </div></article>`;
 }
-function renderCards(){
-  const mi = MAPS.filter(x=>x.city==="Milano");
-  const rm = MAPS.filter(x=>x.city==="Roma");
-  cardsEl.innerHTML = `<h2 class="section-title">Milano</h2><div class="grid">${mi.map(cardHtml).join('')}</div>
-  <h2 class="section-title">Roma</h2><div class="grid">${rm.map(cardHtml).join('')}</div>`;
-}
-renderCards();
+cardsEl.innerHTML=MAPS.map(cardHtml).join('');
 
 /* ---------- MODAL + MAP ---------- */
-const modal = document.getElementById('modal');
-const modalTitle = document.getElementById('modalTitle');
-const modalSubtitle = document.getElementById('modalSubtitle');
-const modalCover = document.getElementById('modalCover');
-const modalAbout = document.getElementById('modalAbout');
-const keywordsBox = document.getElementById('keywords');
-const unlockForm = document.getElementById('unlockForm');
-const emailInput = document.getElementById('email');
-const mapWrap = document.getElementById('mapWrap');
-const mapDiv = document.getElementById('map');
-let current=null, mapInstance=null, markers=[];
+const modal=document.getElementById('modal');
+const modalTitle=document.getElementById('modalTitle');
+const modalSubtitle=document.getElementById('modalSubtitle');
+const modalCover=document.getElementById('modalCover');
+const modalAbout=document.getElementById('modalAbout');
+const keywordsBox=document.getElementById('keywords');
+const unlockForm=document.getElementById('unlockForm');
+const emailInput=document.getElementById('email');
+const mapWrap=document.getElementById('mapWrap');
+let current=null,mapInstance=null,markers=[];
 
 function openModal(id){
-  current = MAPS.find(x=>x.id===id);
-  modalTitle.textContent = current.title;
-  modalSubtitle.textContent = current.subtitle;
-  modalCover.src = current.cover;
-  modalAbout.textContent = current.about;
-
+  current=MAPS.find(x=>x.id===id);
+  modalTitle.textContent=current.title;
+  modalSubtitle.textContent=current.subtitle;
+  modalCover.src=current.cover;
+  modalCover.style.display='none'; // nasconde copertina
+  modalAbout.textContent=current.about;
   keywordsBox.innerHTML="";
   current.keywords.forEach(k=>{
     const el=document.createElement('div');
-    el.className='keyword';
-    el.textContent=k;
+    el.className='keyword';el.textContent=k;
     el.onclick=()=>el.classList.toggle('active');
     keywordsBox.appendChild(el);
   });
-
-  document.getElementById('priceInfo').textContent = `Prezzo fittizio: ${current.price}€`;
-
-  const unlocked = JSON.parse(localStorage.getItem('unlockedMaps')||'[]');
+  document.getElementById('priceInfo').textContent=`Prezzo fittizio: ${current.price}€`;
+  const unlocked=JSON.parse(localStorage.getItem('unlockedMaps')||'[]');
   if(unlocked.includes(current.id)){
-    mapWrap.style.display='flex';
-    showMap();
+    mapWrap.style.display='flex';showMap();unlockForm.style.display='none';
     document.getElementById('chatControls').style.display='flex';
   } else {
-    mapWrap.style.display='flex';
+    mapWrap.style.display='none';unlockForm.style.display='grid';
     document.getElementById('chatControls').style.display='none';
   }
-
-  document.getElementById('placeInfo').style.display='none';
-  updateChatUI();
-  modal.style.display='grid';
+  updateChatUI();modal.style.display='grid';
 }
-
-function closeModal(){ modal.style.display='none'; }
+function closeModal(){modal.style.display='none';modalCover.style.display='block';}
 document.getElementById('modalClose').addEventListener('click',closeModal);
 
-/* ---------- MAP ---------- */
+/* ---------- MAP + PLACE INFO ---------- */
 function showMap(){
-  const unlocked = JSON.parse(localStorage.getItem('unlockedMaps')||'[]');
+  const unlocked=JSON.parse(localStorage.getItem('unlockedMaps')||'[]');
   if(!unlocked.includes(current.id)){
     unlocked.push(current.id);
     localStorage.setItem('unlockedMaps',JSON.stringify(unlocked));
   }
+  mapWrap.style.display='flex';
   if(!mapInstance){
     mapInstance=L.map('map');
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInstance);
   }
   setTimeout(()=>mapInstance.invalidateSize(),0);
-  markers.forEach(m=>m.remove()); markers=[];
+  markers.forEach(m=>m.remove());markers=[];
   mapInstance.setView(current.center,13);
   current.poi.forEach(p=>{
     const mk=L.marker(p.coords).addTo(mapInstance);
@@ -376,87 +379,84 @@ function showMap(){
   });
 }
 function showPlaceInfo(p){
-  const info = document.getElementById('placeInfo');
-  document.getElementById('placeTitle').textContent = p.name||'';
-  document.getElementById('placeType').textContent = p.type||'';
-  document.getElementById('placeDesc').textContent = p.desc||'Nessuna descrizione disponibile.';
-  const googleA = document.getElementById('placeGoogle');
-  const q = encodeURIComponent(p.name + ' ' + (current?current.city:''));
-  googleA.href = `https://www.google.com/maps?q=${q}`;
-  googleA.onclick = ()=>trackEvent({event:'google_maps_click',mapId:current.id,city:current.city,place:p.name});
+  const info=document.getElementById('placeInfo');
+  document.getElementById('placeTitle').textContent=p.name||'';
+  document.getElementById('placeType').textContent=p.type||'';
+  document.getElementById('placeDesc').textContent=p.desc||'Nessuna descrizione disponibile.';
+  const q=encodeURIComponent(p.name+' '+(current?current.city:''));
+  const googleA=document.getElementById('placeGoogle');
+  googleA.href=`https://www.google.com/maps?q=${q}`;
+  googleA.onclick=()=>trackEvent({event:'google_maps_click',mapId:current.id,city:current.city,place:p.name});
   info.style.display='block';
 }
 document.getElementById('closePlaceInfo').addEventListener('click',()=>document.getElementById('placeInfo').style.display='none');
 
-/* ---------- UNLOCK ---------- */
-unlockForm.addEventListener('submit', async (e)=>{
+/* ---------- UNLOCK FORM ---------- */
+unlockForm.addEventListener('submit',async e=>{
   e.preventDefault();
   const email=emailInput.value.trim();
-  if(!email){ alert("Inserisci un'email valida"); return; }
-
-  if(SUBMIT_ENDPOINT){
-    trackEvent({event:'unlock_map',email,mapId:current.id,city:current.city,priceSelected:current.price});
-    await fetch(SUBMIT_ENDPOINT,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        event:'unlock_map',
-        email,
-        mapId:current.id,
-        city:current.city,
-        priceSelected:current.price,
-        interests:Array.from(document.querySelectorAll('.keyword.active')).map(x=>x.textContent)
-      })
-    }).catch(()=>{});
-  }
-  showMap();
+  if(!email){alert("Inserisci un'email valida");return;}
+  await fetch(SUBMIT_ENDPOINT,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      event:'unlock_map',email,mapId:current.id,city:current.city,
+      priceSelected:current.price,
+      interests:Array.from(document.querySelectorAll('.keyword.active')).map(x=>x.textContent)
+    })
+  }).catch(()=>{});
+  showMap();unlockForm.style.display='none';
   document.getElementById('chatControls').style.display='flex';
+  scheduleFeedback(current.id,email);
 });
 
 /* ---------- CHAT ---------- */
 document.getElementById('startChat').addEventListener('click',()=>{
-  let tokens = getChatTokens();
-  if(tokens<=0){ alert('Non hai più avvii chat disponibili. Acquista altri!'); return; }
-  tokens--; setChatTokens(tokens);
+  let tokens=getChatTokens();
+  if(tokens<=0){alert('Hai esaurito gli avvii chat. Clicca "Acquista altri avvii" per ottenerne altri.');return;}
+  tokens--;setChatTokens(tokens);
   trackEvent({event:'chat_attempt',mapId:current.id,city:current.city});
   alert('La chat con il Local non è ancora disponibile, ma sarà aggiunta presto!');
 });
 document.getElementById('buyChatBtn').addEventListener('click',()=>{
-  let tokens = getChatTokens();
-  tokens+=5;
-  setChatTokens(tokens);
+  let tokens=getChatTokens();tokens+=5;setChatTokens(tokens);
   trackEvent({event:'buy_chat',mapId:current.id,city:current.city});
 });
 
 /* ---------- FEEDBACK ---------- */
-function buildFeedbackUrl(mapId,email){ 
+function buildFeedbackUrl(mapId,email){
   const u=new URL(FEEDBACK_FORM);
   u.searchParams.set("mapId",mapId);
   u.searchParams.set("email",email||"");
   return u.toString();
 }
 function scheduleFeedback(mapId,email){
-  const k = `feedback_shown:${mapId}`;
-  if(localStorage.getItem(k)) return;
+  const k=`feedback_shown:${mapId}`;
+  if(localStorage.getItem(k))return;
   setTimeout(()=>{
     const toast=document.getElementById('feedbackToast');
     const link=document.getElementById('feedbackLink');
     const close=document.getElementById('feedbackClose');
     link.href=buildFeedbackUrl(mapId,email);
     toast.style.display='flex';
-    close.onclick=()=>{ toast.style.display='none'; localStorage.setItem(k,'1'); };
+    close.onclick=()=>{toast.style.display='none';localStorage.setItem(k,'1');};
   },FEEDBACK_DELAY_MS);
 }
 </script>
 
 <!-- Feedback toast -->
-<div id="feedbackToast" style=" position:fixed;left:16px;right:16px;bottom:16px;z-index:200; display:none;gap:10px;align-items:center;justify-content:space-between; background:#1e1b2c;color:#fff;border:1px solid #444;padding:14px 16px; border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.25);">
-  <div style="font-size:15px"> Ti va di dirci com’è andata? Basta 1 minuto 🙏 </div>
+<div id="feedbackToast" style="position:fixed;left:16px;right:16px;bottom:16px;z-index:200;
+display:none;gap:10px;align-items:center;justify-content:space-between;
+background:#1e1b2c;color:#fff;border:1px solid #444;padding:14px 16px;
+border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.25);">
+  <div style="font-size:15px">Ti va di dirci com’è andata? Basta 1 minuto 🙏</div>
   <div style="display:flex;gap:8px">
-    <a id="feedbackLink" target="_blank" rel="noopener" style="background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:10px;font-weight:600;text-decoration:none;"> Apri questionario </a>
-    <button id="feedbackClose" style="background:transparent;color:#ddd;border:1px solid #555;padding:8px 12px;border-radius:10px;cursor:pointer"> Più tardi </button>
+    <a id="feedbackLink" target="_blank" rel="noopener"
+       style="background:var(--accent);color:#fff;border:none;padding:8px 12px;
+       border-radius:10px;font-weight:600;text-decoration:none;">Apri questionario</a>
+    <button id="feedbackClose"
+       style="background:transparent;color:#ddd;border:1px solid #555;
+       padding:8px 12px;border-radius:10px;cursor:pointer">Più tardi</button>
   </div>
 </div>
-
 </body>
 </html>
