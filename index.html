@@ -461,31 +461,12 @@ unlockForm.addEventListener('submit',async e=>{
 /* ---------- CHAT ---------- */
 document.getElementById('startChat').addEventListener('click',()=>{
   let tokens = getChatTokens();
+
   if (tokens <= 0) {
-    // popup
-    const popup = document.createElement('div');
-    popup.id = "noChatPopup";
-    popup.innerHTML = `
-      <div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-      background:rgba(0,0,0,0.5);z-index:999;">
-        <div style="background:#fff;padding:24px 28px;border-radius:14px;max-width:320px;
-        text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.25);font-family:Inter,sans-serif;">
-          <h3 style="margin:0 0 10px;color:var(--accent);font-size:17px;">Avvii esauriti 💬</h3>
-          <p style="margin:0 0 16px;color:#333;font-size:15px;line-height:1.4;">
-            Hai esaurito gli avvii chat disponibili.<br>
-            Clicca “Acquista altri avvii” per ottenerne altri.
-          </p>
-          <button id="closeNoChatPopup"
-            style="background:var(--accent);color:#fff;border:none;padding:8px 14px;
-            border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;">
-            OK
-          </button>
-        </div>
-      </div>`;
-    document.body.appendChild(popup);
-    document.getElementById('closeNoChatPopup').onclick = () => popup.remove();
+    alert('Hai esaurito gli avvii chat disponibili. Clicca “Acquista altri avvii” per ottenerne altri.');
     return;
   }
+
   tokens--;
   setChatTokens(tokens);
   trackEvent({event:'chat_attempt',mapId:current.id,city:current.city});
