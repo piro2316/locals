@@ -84,6 +84,13 @@ input[type=email]{padding:9px 10px;border:1px solid var(--border);
 border-radius:10px;font-size:14.5px;width:100%}
 .btn{padding:10px 12px;border-radius:10px;font-weight:700;cursor:pointer}
 .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#fff}
+.btn--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  pointer-events: auto;
+}
 #map{height:360px;border-radius:12px;border:1px solid var(--border)}
 
 /* Place info */
@@ -229,13 +236,18 @@ if(localStorage.getItem(CHAT_TOKENS_KEY)===null) localStorage.setItem(CHAT_TOKEN
 function getChatTokens(){ return Number(localStorage.getItem(CHAT_TOKENS_KEY)||3); }
 function setChatTokens(n){ localStorage.setItem(CHAT_TOKENS_KEY,String(n)); updateChatUI(); }
 function updateChatUI(){
-  const counter=document.getElementById('chatCounter');
-  const startBtn=document.getElementById('startChat');
-  const controls=document.getElementById('chatControls');
-  const tokens=getChatTokens();
-  counter.textContent=`Avvii disponibili: ${tokens}`;
-  startBtn.disabled=tokens<=0;
-  controls.style.display='flex';
+  const counter = document.getElementById('chatCounter');
+  const startBtn = document.getElementById('startChat');
+  const controls = document.getElementById('chatControls');
+  const tokens = getChatTokens();
+
+  counter.textContent = `Avvii disponibili: ${tokens}`;
+  if (tokens <= 0) {
+    startBtn.classList.add('btn--disabled');
+  } else {
+    startBtn.classList.remove('btn--disabled');
+  }
+  controls.style.display = 'flex';
 }
 
 /* ---------- TRACKING ---------- */
