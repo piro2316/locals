@@ -68,7 +68,11 @@ display:flex;justify-content:space-between;align-items:center;background:#f4f3ff
 .modal-title{font-weight:800}.modal-sub{font-size:12.5px;color:#6a6f82}
 .close{cursor:pointer;font-size:18px;border:none;background:none;color:#666;line-height:1}
 .close:hover{color:var(--accent)}
-.modal-body{padding:14px 16px;overflow:auto}
+.modal-body{
+  padding:14px 16px;
+  overflow-y:visible;
+  max-height:none;
+}
 .modal img{width:100%;height:220px;border-radius:12px;object-fit:cover}
 .about{margin:10px 0 10px}
 .keywords{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
@@ -150,11 +154,19 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
       <div style="font-weight:600;margin-bottom:8px;color:var(--accent)">
         Prezzo fittizio: <span id="priceDisplay">0€</span> — nessun addebito reale
       </div>
-      <form id="unlockForm" class="form">
+      <form id="unlockForm" class="form" style="align-items:flex-start;">
         <input id="email" type="email" placeholder="La tua email per sbloccare la mappa" required>
-        <div style="display:flex;flex-direction:column;gap:4px;">
-          <button type="submit" id="btnUnlock" class="btn btn-primary">Sblocca mappa</button>
-          <div id="priceInfo" style="font-size:12px;color:#6b6b7c;">Prezzo fittizio: 0€</div>
+      
+        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button type="submit" id="btnUnlock" class="btn btn-primary">Sblocca mappa</button>
+            <span id="priceInfo" style="font-weight:600;color:var(--accent);font-size:15px;">
+              0€
+            </span>
+          </div>
+          <div style="font-size:12px;color:#6b6b7c;">
+            * Prezzo fittizio — nessun addebito reale
+          </div>
         </div>
       </form>
 
@@ -172,22 +184,22 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
           border-radius:12px;padding:14px;display:none;margin-top:12px;
           box-shadow:0 4px 10px rgba(0,0,0,0.05);">
           
-          <div class="close-info" id="closePlaceInfo"
-               style="cursor:pointer;font-size:14px;color:#666;text-align:right;margin-bottom:6px;">✕ Chiudi</div>
-          
-          <h4 id="placeTitle" style="margin:0 0 6px;"></h4>
-          <div id="placeType" style="font-size:13px;color:var(--muted);margin-bottom:8px"></div>
-          <div id="placeDesc" style="font-size:14px;color:var(--text);margin-bottom:12px"></div>
-          
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
-            <button id="startChat" class="btn btn-primary" style="display:none;">Avvia chat</button>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <h4 id="placeTitle" style="margin:0;"></h4>
+              <div id="placeType" style="font-size:13px;color:var(--muted);margin-bottom:8px"></div>
+              <div id="placeDesc" style="font-size:14px;color:var(--text);"></div>
+            </div>
             <a id="placeGoogle" target="_blank" rel="noopener noreferrer"
                class="btn"
-               style="text-decoration:none;padding:8px 10px;border-radius:8px;background:#f4f3ff;
-               color:var(--accent);border:1px solid var(--border)">
+               style="text-decoration:none;padding:8px 10px;margin-left:12px;border-radius:8px;
+               background:#f4f3ff;color:var(--accent);border:1px solid var(--border);white-space:nowrap;">
                Apri su Google Maps
             </a>
           </div>
+        
+          <div class="close-info" id="closePlaceInfo"
+               style="cursor:pointer;font-size:13px;color:#666;text-align:right;margin-top:8px;">✕ Chiudi</div>
         </aside>
       </div>
     </div>
@@ -366,7 +378,7 @@ function openModal(id){
     el.onclick=()=>el.classList.toggle('active');
     keywordsBox.appendChild(el);
   });
-  document.getElementById('priceDisplay').textContent = `${current.price}€`;
+  document.getElementById('priceInfo').textContent = `${current.price}€`;
   const unlocked=JSON.parse(localStorage.getItem('unlockedMaps')||'[]');
   if(unlocked.includes(current.id)){
     document.getElementById('startChat').style.display = 'inline-flex';
