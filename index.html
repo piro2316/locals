@@ -167,24 +167,23 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
         </div>
       </form>
 
-      <div id="chatControls" style="display:none;flex-direction:column;gap:10px;margin-top:16px;width:100%;">
+      <div id="chatControls" style="display:none;flex-direction:column;gap:12px;margin-top:16px;width:100%;">
         
-        <!-- Riga superiore: bottone a sinistra e contatore a destra -->
+        <!-- Riga superiore: Avvia chat a sinistra, contatore a destra -->
         <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
           <button id="startChat" class="btn btn-primary" style="flex:1;">Avvia chat</button>
-          <div id="chatCounter" style="font-weight:600;padding:6px 12px;border-radius:8px;background:#f0efff;
-            color:#3c3a6a;margin-left:10px;font-size:14px;white-space:nowrap;">
-            Avvii disponibili: 3
+          <div style="display:flex;flex-direction:column;align-items:center;margin-left:10px;">
+            <div id="chatCounter" style="font-weight:600;padding:6px 12px;border-radius:8px;background:#f0efff;
+              color:#3c3a6a;font-size:14px;white-space:nowrap;margin-bottom:6px;">
+              Avvii disponibili: 3
+            </div>
+            <button id="buyChatBtn" class="btn"
+              style="background:#f4f3ff;color:var(--accent);border:1px solid var(--border);font-weight:600;
+              padding:6px 10px;font-size:14px;">
+              Acquista altri avvii
+            </button>
+            <div style="font-size:12px;color:#6b6b7c;margin-top:4px;">* Nessun addebito reale</div>
           </div>
-        </div>
-      
-        <!-- Riga inferiore: pulsante per acquistare e avviso -->
-        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;">
-          <button id="buyChatBtn" class="btn" 
-            style="background:#f4f3ff;color:var(--accent);border:1px solid var(--border);font-weight:600;">
-            Acquista altri avvii
-          </button>
-          <div style="font-size:12px;color:#6b6b7c;">* Nessun addebito reale</div>
         </div>
       </div>
 
@@ -463,23 +462,28 @@ unlockForm.addEventListener('submit',async e=>{
 document.getElementById('startChat').addEventListener('click',()=>{
   let tokens = getChatTokens();
   if (tokens <= 0) {
+    // popup
     const popup = document.createElement('div');
+    popup.id = "noChatPopup";
     popup.innerHTML = `
       <div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
       background:rgba(0,0,0,0.5);z-index:999;">
-        <div style="background:#fff;padding:20px 24px;border-radius:12px;max-width:300px;
-        text-align:center;box-shadow:0 6px 20px rgba(0,0,0,0.2);">
-          <p style="margin-bottom:16px;color:#333;font-size:15px;">
+        <div style="background:#fff;padding:24px 28px;border-radius:14px;max-width:320px;
+        text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.25);font-family:Inter,sans-serif;">
+          <h3 style="margin:0 0 10px;color:var(--accent);font-size:17px;">Avvii esauriti 💬</h3>
+          <p style="margin:0 0 16px;color:#333;font-size:15px;line-height:1.4;">
             Hai esaurito gli avvii chat disponibili.<br>
             Clicca “Acquista altri avvii” per ottenerne altri.
           </p>
-          <button style="background:var(--accent);color:#fff;border:none;padding:8px 12px;
-          border-radius:8px;cursor:pointer;font-weight:600;">OK</button>
+          <button id="closeNoChatPopup"
+            style="background:var(--accent);color:#fff;border:none;padding:8px 14px;
+            border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;">
+            OK
+          </button>
         </div>
       </div>`;
-    const btn = popup.querySelector('button');
-    btn.onclick = () => popup.remove();
     document.body.appendChild(popup);
+    document.getElementById('closeNoChatPopup').onclick = () => popup.remove();
     return;
   }
   tokens--;
