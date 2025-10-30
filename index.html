@@ -147,7 +147,9 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
       <img id="modalCover" src="" alt="" loading="lazy">
       <p id="modalAbout" class="about"></p>
       <div id="keywords" class="keywords"></div>
-
+      <div style="font-weight:600;margin-bottom:8px;color:var(--accent)">
+        Prezzo fittizio: <span id="priceDisplay">0€</span> — nessun addebito reale
+      </div>
       <form id="unlockForm" class="form">
         <input id="email" type="email" placeholder="La tua email per sbloccare la mappa" required>
         <div style="display:flex;flex-direction:column;gap:4px;">
@@ -165,14 +167,27 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
 
       <div id="mapWrap" class="map-wrap" style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">
         <div id="map" style="width:100%"></div>
-        <aside id="placeInfo">
-          <div class="close-info" id="closePlaceInfo">✕ Chiudi</div>
-          <h4 id="placeTitle"></h4>
+        <aside id="placeInfo"
+          style="width:100%;background:#fff;border:1px solid var(--border);
+          border-radius:12px;padding:14px;display:none;margin-top:12px;
+          box-shadow:0 4px 10px rgba(0,0,0,0.05);">
+          
+          <div class="close-info" id="closePlaceInfo"
+               style="cursor:pointer;font-size:14px;color:#666;text-align:right;margin-bottom:6px;">✕ Chiudi</div>
+          
+          <h4 id="placeTitle" style="margin:0 0 6px;"></h4>
           <div id="placeType" style="font-size:13px;color:var(--muted);margin-bottom:8px"></div>
           <div id="placeDesc" style="font-size:14px;color:var(--text);margin-bottom:12px"></div>
-          <a id="placeGoogle" target="_blank" rel="noopener noreferrer"
-             class="btn" style="text-decoration:none;padding:8px 10px;border-radius:8px;background:#f4f3ff;
-             color:#7c7aac;border:1px solid var(--border)">Apri su Google Maps</a>
+          
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+            <button id="startChat" class="btn btn-primary" style="display:none;">Avvia chat</button>
+            <a id="placeGoogle" target="_blank" rel="noopener noreferrer"
+               class="btn"
+               style="text-decoration:none;padding:8px 10px;border-radius:8px;background:#f4f3ff;
+               color:var(--accent);border:1px solid var(--border)">
+               Apri su Google Maps
+            </a>
+          </div>
         </aside>
       </div>
     </div>
@@ -314,7 +329,16 @@ function cardHtml(m){
       <div class="chips">${m.keywords.map(k=>`<span class="pill">${k}</span>`).join('')}</div>
     </div></article>`;
 }
-cardsEl.innerHTML=MAPS.map(cardHtml).join('');
+function renderCards(){
+  const mi = MAPS.filter(x=>x.city==="Milano");
+  const rm = MAPS.filter(x=>x.city==="Roma");
+  cardsEl.innerHTML = `
+    <h2 class="section-title">Milano</h2>
+    <div class="grid">${mi.map(cardHtml).join('')}</div>
+    <h2 class="section-title">Roma</h2>
+    <div class="grid">${rm.map(cardHtml).join('')}</div>`;
+}
+renderCards();
 
 /* ---------- MODAL + MAP ---------- */
 const modal=document.getElementById('modal');
@@ -342,12 +366,14 @@ function openModal(id){
     el.onclick=()=>el.classList.toggle('active');
     keywordsBox.appendChild(el);
   });
-  document.getElementById('priceInfo').textContent=`Prezzo fittizio: ${current.price}€`;
+  document.getElementById('priceDisplay').textContent = `${current.price}€`;
   const unlocked=JSON.parse(localStorage.getItem('unlockedMaps')||'[]');
   if(unlocked.includes(current.id)){
+    document.getElementById('startChat').style.display = 'inline-flex';
     mapWrap.style.display='flex';showMap();unlockForm.style.display='none';
     document.getElementById('chatControls').style.display='flex';
   } else {
+    document.getElementById('startChat').style.display = 'none';
     mapWrap.style.display='none';unlockForm.style.display='grid';
     document.getElementById('chatControls').style.display='none';
   }
@@ -411,9 +437,13 @@ unlockForm.addEventListener('submit',async e=>{
 
 /* ---------- CHAT ---------- */
 document.getElementById('startChat').addEventListener('click',()=>{
-  let tokens=getChatTokens();
-  if(tokens<=0){alert('Hai esaurito gli avvii chat. Clicca "Acquista altri avvii" per ottenerne altri.');return;}
-  tokens--;setChatTokens(tokens);
+  let tokens = getChatTokens();
+  if(tokens <= 0){
+    alert('Hai esaurito gli avvii chat disponibili. Clicca "Acquista altri avvii" per ottenerne altri.');
+    return;
+  }
+  tokens--;
+  setChatTokens(tokens);
   trackEvent({event:'chat_attempt',mapId:current.id,city:current.city});
   alert('La chat con il Local non è ancora disponibile, ma sarà aggiunta presto!');
 });
