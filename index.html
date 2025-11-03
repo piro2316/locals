@@ -249,16 +249,35 @@ const FEEDBACK_DELAY_MS = 10000;
 
 /* ---------- CHAT TOKENS ---------- */
 const CHAT_TOKENS_KEY = 'chatTokens';
-if(localStorage.getItem(CHAT_TOKENS_KEY)===null) localStorage.setItem(CHAT_TOKENS_KEY,'3');
-function getChatTokens(){ return Number(localStorage.getItem(CHAT_TOKENS_KEY)||3); }
+if(localStorage.getItem(CHAT_TOKENS_KEY)===null) localStorage.setItem(CHAT_TOKENS_KEY,'1');
+function getChatTokens(){ return Number(localStorage.getItem(CHAT_TOKENS_KEY)||1); }
 function setChatTokens(n){ localStorage.setItem(CHAT_TOKENS_KEY,String(n)); updateChatUI(); }
-function updateChatUI(){
-  const counter = document.getElementById('chatCounter');
+/* ---------- MAP TOKENS ---------- */
+const MAP_TOKENS_KEY = 'mapTokens';
+if (localStorage.getItem(MAP_TOKENS_KEY) === null) localStorage.setItem(MAP_TOKENS_KEY, '1');
+
+function getMapTokens() {
+  return Number(localStorage.getItem(MAP_TOKENS_KEY) || 1);
+}
+function setMapTokens(n) {
+  localStorage.setItem(MAP_TOKENS_KEY, String(n));
+  updateGlobalCounters();
+}
+
+/* ---------- COUNTERS UPDATE ---------- */
+function updateGlobalCounters() {
+  const mapCounter = document.getElementById('mapCounter');
+  const chatCounter = document.getElementById('chatGlobalCounter');
+  mapCounter.textContent = `🔓 Mappe: ${getMapTokens()}`;
+  chatCounter.textContent = `💬 Chat: ${getChatTokens()}`;
+}
+
+/* ---------- CHAT UI UPDATE ---------- */
+function updateChatUI() {
   const startBtn = document.getElementById('startChat');
   const controls = document.getElementById('chatControls');
   const tokens = getChatTokens();
 
-  counter.textContent = `Avvii disponibili: ${tokens}`;
   if (tokens <= 0) {
     startBtn.classList.add('btn--disabled');
   } else {
@@ -266,19 +285,6 @@ function updateChatUI(){
   }
   controls.style.display = 'flex';
 
-  const MAP_TOKENS_KEY = 'mapTokens';
-  if(localStorage.getItem(MAP_TOKENS_KEY)===null) localStorage.setItem(MAP_TOKENS_KEY,'1');
-  
-  function getMapTokens(){ return Number(localStorage.getItem(MAP_TOKENS_KEY)||1); }
-  function setMapTokens(n){ localStorage.setItem(MAP_TOKENS_KEY,String(n)); updateGlobalCounters(); }
-  
-  function updateGlobalCounters(){
-    const mapCounter = document.getElementById('mapCounter');
-    const chatCounter = document.getElementById('chatGlobalCounter');
-    mapCounter.textContent = `🔓 Mappe: ${getMapTokens()}`;
-    chatCounter.textContent = `💬 Chat: ${getChatTokens()}`;
-  }
-  
   updateGlobalCounters();
 }
 
@@ -405,6 +411,7 @@ function renderCards(){
     <div class="grid">${rm.map(cardHtml).join('')}</div>`;
 }
 renderCards();
+updateGlobalCounters();
 
 /* ---------- MODAL + MAP ---------- */
 const modal=document.getElementById('modal');
