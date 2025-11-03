@@ -319,7 +319,7 @@ const MAPS = [
     subtitle:"Product designer e pasticcerie d’autore",
     about:"Designer appassionata di pasticcerie e spazi curati. Ti guiderò tra caffè artigianali, brunch memorabili e cortili nascosti.",
     keywords:["Foodie","Design","Caffè","Brunch","Arte"],
-    center:[45.463,9.189], price:20,
+    center:[45.463,9.189], price:10,
     poi:[
       {name:"Trippa",type:"Ristorante",coords:[45.4508,9.2054]},
       {name:"Bar Luce",type:"Caffè",coords:[45.4516,9.1796]},
@@ -344,7 +344,7 @@ const MAPS = [
     subtitle:"Dev by day, clubber by night",
     about:"Sviluppatore di giorno, clubber di notte. Tra coworking, bar alternativi e club sotterranei: la Milano alternativa.",
     keywords:["Nightlife","Startups","Musica","Cocktail"],
-    center:[45.463,9.189], price:25,
+    center:[45.463,9.189], price:8,
     poi:[
       {name:"BASE",type:"Hub",coords:[45.4517,9.1702]},
       {name:"Tempio del Futuro Perduto",type:"Spazio",coords:[45.4899,9.1802]},
@@ -369,7 +369,7 @@ const MAPS = [
     subtitle:"Archivista e cortili segreti",
     about:"Archivista e fotografa: ti porterò tra belvederi, giardini e scorci fuori dal circuito turistico.",
     keywords:["Storia","Fotografia","Giardini","Relax"],
-    center:[41.9028,12.4964], price:10,
+    center:[41.9028,12.4964], price:12,
     poi:[
       {name:"Gianicolo",type:"Panorama",coords:[41.8925,12.4612]},
       {name:"Coppedè",type:"Quartiere",coords:[41.9197,12.5116]},
@@ -387,7 +387,7 @@ const MAPS = [
     subtitle:"Food trucker e nottambulo",
     about:"Appassionato di street food e nightlife: mercati, birre artigianali e piazze vive per serate autentiche.",
     keywords:["Street food","Nightlife","Birre","Aperitivi"],
-    center:[41.9028,12.4964], price:15,
+    center:[41.9028,12.4964], price:10,
     poi:[
       {name:"Trapizzino Testaccio",type:"Street food",coords:[41.8769,12.4769]},
       {name:"Open Baladin",type:"Birreria",coords:[41.8984,12.4737]},
@@ -456,7 +456,7 @@ function openModal(id){
   const freeMaps = getMapTokens();
   if (freeMaps > 0) {
     // Mostra prezzo barrato e gratuito
-    mapPriceEl.innerHTML = `<span style="text-decoration:line-through;opacity:0.7;">${current.price}€</span> <span style="color:green;font-weight:700;">0€ Gratis</span>`;
+    mapPriceEl.innerHTML = `<span style="text-decoration:line-through;opacity:0.7;">${current.price}€</span> <span style="color:green;font-weight:700;">Gratis</span>`;
   } else {
     // Mostra prezzo normale
     mapPriceEl.innerHTML = `<span style="font-weight:600;color:var(--accent);">${current.price}€</span>`;
@@ -547,7 +547,7 @@ document.getElementById('startChat').addEventListener('click',()=>{
   if (!hasSubscription()) {
     let tokens = getChatTokens();
     if (tokens <= 0) {
-      alert('Hai esaurito gli avvii chat disponibili. Scopri le opzioni di abbonamento!');
+      alert('Hai esaurito le chat disponibili. Scopri le opzioni di abbonamento!');
       openSubscriptionModal();
       return;
     }
@@ -615,14 +615,12 @@ function closeSubscriptionModal(){
   document.getElementById('subscriptionModal').style.display='none';
 }
 function selectPlan(plan){
-  if(plan === 'pacchetto'){
-    // Aggiunge 5 chat token
+  if (plan === 'pacchetto') {
     setChatTokens(getChatTokens() + 5);
-    alert('✅ Hai ottenuto 5 chat extra! (tutto fittizio)');
-  }
-  else if(plan === 'mensile'){
+    alert('Hai ottenuto 5 chat aggiuntive! 🎉');
+  } else if (plan === 'mensile') {
     activateSubscription();
-    alert('🌍 Abbonamento mensile attivato! Ora hai accesso illimitato a mappe e chat (fittizio).');
+    alert('Abbonamento mensile attivato! Ora hai accesso illimitato a mappe e chat.');
   }
 
   trackEvent({event:'select_plan',plan});
@@ -636,24 +634,23 @@ function selectPlan(plan){
   position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;
   align-items:center;justify-content:center;z-index:350;">
   <div style="background:#fff;border-radius:14px;padding:24px;max-width:420px;width:90%;text-align:center;">
-    <h2 style="color:var(--accent);margin-top:0;">Piani Locals (fittizi)</h2>
+    <h2 style="color:var(--accent);margin-top:0;">Sblocca più mappe e chat</h2>
     <p style="font-size:14px;color:#666;margin-bottom:20px;">
       Scegli un piano per continuare a esplorare e chattare con i Local.<br>
-      <strong>* Tutto gratuito, nessun addebito reale.</strong>
     </p>
 
     <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
       <button onclick="selectPlan('pacchetto')" class="btn btn-primary">
-        💬 Pacchetto 5 chat extra – 4,99€*
+        💬 Pacchetto 5 chat aggiuntive – 4,99€*
       </button>
       <button onclick="selectPlan('mensile')" class="btn btn-primary">
-        🌍 Abbonamento mensile illimitato – 9,99€*
+        🌍 Abbonamento mensile – accesso illimitato – 9,99€*
       </button>
     </div>
 
-    <p style="font-size:12.5px;color:#888;margin-bottom:14px;">
-      * Prezzi fittizi – nessun addebito reale o raccolta dati di pagamento.
-    </p>
+    <div style="font-size:13px;color:#444;font-weight:600;margin-top:4px;">
+      * Nessun addebito reale
+    </div>
     <button onclick="closeSubscriptionModal()" style="background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;">Chiudi</button>
   </div>
 </div>
