@@ -117,10 +117,35 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
   .section-title{font-size:18px;margin:18px 0 10px}
   .modal img{display:none}
   #map{height:280px}
+  #globalCounters{
+    top:auto;bottom:16px;right:16px;
+    flex-direction:row;align-items:center;
+  }
 }
 </style>
 </head>
 <body>
+<div id="globalCounters" style="
+  position:fixed;top:16px;right:16px;z-index:300;
+  display:flex;flex-direction:column;gap:8px;
+  align-items:flex-end;">
+  
+  <div id="mapCounter" style="
+    background:#fff;border:1px solid var(--border);
+    border-radius:12px;padding:6px 12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    font-size:14px;font-weight:600;color:var(--accent);">
+    🔓 Mappe: 1
+  </div>
+  
+  <div id="chatGlobalCounter" style="
+    background:#fff;border:1px solid var(--border);
+    border-radius:12px;padding:6px 12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    font-size:14px;font-weight:600;color:var(--accent);">
+    💬 Chat: 1
+  </div>
+</div>
 <div class="container">
   <header class="header">
     <div style="display:flex;align-items:center;gap:10px">
@@ -248,6 +273,21 @@ function updateChatUI(){
     startBtn.classList.remove('btn--disabled');
   }
   controls.style.display = 'flex';
+
+  const MAP_TOKENS_KEY = 'mapTokens';
+  if(localStorage.getItem(MAP_TOKENS_KEY)===null) localStorage.setItem(MAP_TOKENS_KEY,'1');
+  
+  function getMapTokens(){ return Number(localStorage.getItem(MAP_TOKENS_KEY)||1); }
+  function setMapTokens(n){ localStorage.setItem(MAP_TOKENS_KEY,String(n)); updateGlobalCounters(); }
+  
+  function updateGlobalCounters(){
+    const mapCounter = document.getElementById('mapCounter');
+    const chatCounter = document.getElementById('chatGlobalCounter');
+    mapCounter.textContent = `🔓 Mappe: ${getMapTokens()}`;
+    chatCounter.textContent = `💬 Chat: ${getChatTokens()}`;
+  }
+  
+  updateGlobalCounters();
 }
 
 /* ---------- TRACKING ---------- */
@@ -466,6 +506,14 @@ unlockForm.addEventListener('submit',async e=>{
     })
   }).catch(()=>{});
   showMap();unlockForm.style.display='none';
+  let remainingMaps = getMapTokens();
+  if (remainingMaps > 0) {
+    remainingMaps--;
+    setMapTokens(remainingMaps);
+  } else {
+    alert("Hai esaurito gli sblocchi gratuiti. Scopri le opzioni di abbonamento!");
+    openSubscriptionModal();
+  }
   document.getElementById('chatControls').style.display='flex';
   scheduleFeedback(current.id,email);
 });
@@ -508,7 +556,64 @@ function scheduleFeedback(mapId,email){
     close.onclick=()=>{toast.style.display='none';localStorage.setItem(k,'1');};
   },FEEDBACK_DELAY_MS);
 }
+
+/* ---------- TUTORIAL ---------- */
+const tutorialSteps = [
+  "Benvenuto su Locals! 🎉 Hai 1 mappa e 1 chat gratuite per iniziare.",
+  "Guarda in alto a destra 🔝 per vedere quanti sblocchi ti restano.",
+  "Per sbloccare una mappa inserisci la tua email. Tutto è gratuito e senza addebiti!"
+];
+let currentStep = 0;
+
+function startTutorial(){
+  if(localStorage.getItem('tutorial_seen')) return;
+  const overlay = document.getElementById('tutorialOverlay');
+  const stepBox = document.getElementById('tutorialStep');
+  const nextBtn = document.getElementById('tutorialNext');
+
+  overlay.style.display = 'flex';
+  stepBox.textContent = tutorialSteps[currentStep];
+  nextBtn.onclick = () => {
+    currentStep++;
+    if(currentStep < tutorialSteps.length){
+      stepBox.textContent = tutorialSteps[currentStep];
+    } else {
+      overlay.style.display = 'none';
+      localStorage.setItem('tutorial_seen','1');
+    }
+  };
+}
+window.addEventListener('load', startTutorial);  
+
+/* ---------- SUBSCRIPTION MODAL ---------- */
+function openSubscriptionModal(){
+  document.getElementById('subscriptionModal').style.display='flex';
+}
+function closeSubscriptionModal(){
+  document.getElementById('subscriptionModal').style.display='none';
+}
+function selectPlan(plan){
+  alert(`Hai scelto il piano: ${plan}. Tutto fittizio, nessun addebito reale.`);
+  trackEvent({event:'select_plan',plan});
+  closeSubscriptionModal();
+}
 </script>
+
+<!-- Subscription modal -->
+<div id="subscriptionModal" style="
+  position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;
+  align-items:center;justify-content:center;z-index:350;">
+  <div style="background:#fff;border-radius:14px;padding:24px;max-width:420px;width:90%;text-align:center;">
+    <h2 style="color:var(--accent);margin-top:0;">Piani Locals (fittizi)</h2>
+    <p style="font-size:14px;color:#666;margin-bottom:20px;">Scegli un piano per sbloccare più mappe o chat.<br>* Tutto gratuito, nessun addebito reale.</p>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+      <button onclick="selectPlan('singolo')" class="btn btn-primary">1 mappa extra – 0€*</button>
+      <button onclick="selectPlan('pacchetto')" class="btn btn-primary">5 chat extra – 0€*</button>
+      <button onclick="selectPlan('illimitato')" class="btn btn-primary">Abbonamento illimitato – 0€*</button>
+    </div>
+    <button onclick="closeSubscriptionModal()" style="background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;">Chiudi</button>
+  </div>
+</div>
 
 <!-- Feedback toast -->
 <div id="feedbackToast" style="position:fixed;left:16px;right:16px;bottom:16px;z-index:200;
@@ -521,9 +626,22 @@ border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.25);">
        style="background:var(--accent);color:#fff;border:none;padding:8px 12px;
        border-radius:10px;font-weight:600;text-decoration:none;">Apri questionario</a>
     <button id="feedbackClose"
-       style="background:transparent;color:#ddd;border:1px solid #555;
-       padding:8px 12px;border-radius:10px;cursor:pointer">Più tardi</button>
+      style="background:transparent;color:#ddd;border:1px solid #555;
+      padding:8px 12px;border-radius:10px;cursor:pointer;
+      font-family:'Inter',system-ui,sans-serif;font-weight:500;font-size:14px;">
+      Più tardi
+    </button>
   </div>
 </div>
+
+<!-- Tutorial overlay -->
+<div id="tutorialOverlay" style="
+  position:fixed;inset:0;background:rgba(0,0,0,0.85);color:#fff;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;z-index:400;padding:24px;">
+  <div id="tutorialStep" style="max-width:400px;font-size:18px;line-height:1.6;"></div>
+  <button id="tutorialNext" class="btn btn-primary" style="margin-top:20px;">Avanti</button>
+</div>
+  
 </body>
 </html>
