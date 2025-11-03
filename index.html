@@ -244,6 +244,7 @@ const CHAT_TOKENS_KEY = 'chatTokens';
 if(localStorage.getItem(CHAT_TOKENS_KEY)===null) localStorage.setItem(CHAT_TOKENS_KEY,'1');
 function getChatTokens(){ return Number(localStorage.getItem(CHAT_TOKENS_KEY)||1); }
 function setChatTokens(n){ localStorage.setItem(CHAT_TOKENS_KEY,String(n)); updateChatUI(); }
+  
 /* ---------- MAP TOKENS ---------- */
 const MAP_TOKENS_KEY = 'mapTokens';
 if (localStorage.getItem(MAP_TOKENS_KEY) === null) localStorage.setItem(MAP_TOKENS_KEY, '1');
@@ -256,12 +257,28 @@ function setMapTokens(n) {
   updateGlobalCounters();
 }
 
+/* ---------- SUBSCRIPTION STATE ---------- */
+const SUBSCRIPTION_KEY = 'subscriptionActive';
+function hasSubscription(){
+  return localStorage.getItem(SUBSCRIPTION_KEY) === 'true';
+}
+function activateSubscription(){
+  localStorage.setItem(SUBSCRIPTION_KEY, 'true');
+  updateGlobalCounters();
+}
+  
 /* ---------- COUNTERS UPDATE ---------- */
 function updateGlobalCounters() {
   const mapCounter = document.getElementById('mapCounter');
   const chatCounter = document.getElementById('chatGlobalCounter');
-  mapCounter.textContent = `🔓 Mappe: ${getMapTokens()}`;
-  chatCounter.textContent = `💬 Chat: ${getChatTokens()}`;
+
+  if (hasSubscription()) {
+    mapCounter.textContent = "🔓 Mappe: ∞";
+    chatCounter.textContent = "💬 Chat: ∞";
+  } else {
+    mapCounter.textContent = `🔓 Mappe: ${getMapTokens()}`;
+    chatCounter.textContent = `💬 Chat: ${getChatTokens()}`;
+  }  
 }
 
 /* ---------- CHAT UI UPDATE ---------- */
@@ -505,14 +522,17 @@ unlockForm.addEventListener('submit',async e=>{
     })
   }).catch(()=>{});
   showMap();unlockForm.style.display='none';
-  let remainingMaps = getMapTokens();
-  if (remainingMaps > 0) {
-    remainingMaps--;
-    setMapTokens(remainingMaps);
-    updateGlobalCounters();
-  } else {
-    alert("Hai esaurito gli sblocchi gratuiti. Scopri le opzioni di abbonamento!");
-    openSubscriptionModal();
+  if (!hasSubscription()) {
+    let remainingMaps = getMapTokens();
+    if (remainingMaps > 0) {
+      remainingMaps--;
+      setMapTokens(remainingMaps);
+      updateGlobalCounters();
+    } else {
+      alert("Hai esaurito gli sblocchi gratuiti. Scopri le opzioni di abbonamento!");
+      openSubscriptionModal();
+      return;
+    }
   }
   document.getElementById('chatControls').style.display='flex';
   scheduleFeedback(current.id,email);
@@ -520,16 +540,17 @@ unlockForm.addEventListener('submit',async e=>{
 
 /* ---------- CHAT ---------- */
 document.getElementById('startChat').addEventListener('click',()=>{
-  let tokens = getChatTokens();
-
-  if (tokens <= 0) {
-    alert('Hai esaurito gli avvii chat disponibili. Scopri le opzioni di abbonamento!');
-    openSubscriptionModal();
-    return;
+  if (!hasSubscription()) {
+    let tokens = getChatTokens();
+    if (tokens <= 0) {
+      alert('Hai esaurito gli avvii chat disponibili. Scopri le opzioni di abbonamento!');
+      openSubscriptionModal();
+      return;
+    }
+    tokens--;
+    setChatTokens(tokens);
   }
 
-  tokens--;
-  setChatTokens(tokens);
   trackEvent({event:'chat_attempt',mapId:current.id,city:current.city});
   alert('La chat con il Local non è ancora disponibile, ma sarà aggiunta presto!');
 });
@@ -590,10 +611,20 @@ function closeSubscriptionModal(){
   document.getElementById('subscriptionModal').style.display='none';
 }
 function selectPlan(plan){
-  alert(`Hai scelto il piano: ${plan}. Tutto fittizio, nessun addebito reale.`);
+  if(plan === 'pacchetto'){
+    // Aggiunge 5 chat token
+    setChatTokens(getChatTokens() + 5);
+    alert('✅ Hai ottenuto 5 chat extra! (tutto fittizio)');
+  }
+  else if(plan === 'mensile'){
+    activateSubscription();
+    alert('🌍 Abbonamento mensile attivato! Ora hai accesso illimitato a mappe e chat (fittizio).');
+  }
+
   trackEvent({event:'select_plan',plan});
   closeSubscriptionModal();
 }
+
 </script>
 
 <!-- Subscription modal -->
@@ -602,13 +633,23 @@ function selectPlan(plan){
   align-items:center;justify-content:center;z-index:350;">
   <div style="background:#fff;border-radius:14px;padding:24px;max-width:420px;width:90%;text-align:center;">
     <h2 style="color:var(--accent);margin-top:0;">Piani Locals (fittizi)</h2>
-    <p style="font-size:14px;color:#666;margin-bottom:20px;">Scegli un piano per continuare a esplorare mappe e chat.<br><strong>* Tutto gratuito, nessun addebito reale.</strong></p>
+    <p style="font-size:14px;color:#666;margin-bottom:20px;">
+      Scegli un piano per continuare a esplorare e chattare con i Local.<br>
+      <strong>* Tutto gratuito, nessun addebito reale.</strong>
+    </p>
+
     <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
-      <button onclick="selectPlan('singolo')" class="btn btn-primary">🎯 1 mappa extra – 2,99€*</button>
-      <button onclick="selectPlan('pacchetto')" class="btn btn-primary">💬 5 chat extra – 4,99€*</button>
-      <button onclick="selectPlan('mensile')" class="btn btn-primary">🌍 Abbonamento mensile illimitato – 9,99€*</button>
+      <button onclick="selectPlan('pacchetto')" class="btn btn-primary">
+        💬 Pacchetto 5 chat extra – 4,99€*
+      </button>
+      <button onclick="selectPlan('mensile')" class="btn btn-primary">
+        🌍 Abbonamento mensile illimitato – 9,99€*
+      </button>
     </div>
-    <p style="font-size:12.5px;color:#888;margin-bottom:14px;">* Prezzi fittizi – nessun addebito reale o raccolta dati di pagamento.</p>
+
+    <p style="font-size:12.5px;color:#888;margin-bottom:14px;">
+      * Prezzi fittizi – nessun addebito reale o raccolta dati di pagamento.
+    </p>
     <button onclick="closeSubscriptionModal()" style="background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;">Chiudi</button>
   </div>
 </div>
