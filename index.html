@@ -287,13 +287,17 @@ function updateChatUI() {
   const controls = document.getElementById('chatControls');
   const tokens = getChatTokens();
 
-  if (tokens <= 0) {
-    startBtn.classList.add('btn--disabled');
-  } else {
+  if (hasSubscription()) {
     startBtn.classList.remove('btn--disabled');
+  } else {
+    if (tokens <= 0) {
+      startBtn.classList.add('btn--disabled');
+    } else {
+      startBtn.classList.remove('btn--disabled');
+    }
   }
-  controls.style.display = 'flex';
 
+  controls.style.display = 'flex';
   updateGlobalCounters();
 }
 
