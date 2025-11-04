@@ -375,14 +375,14 @@ const MAPS = [
     keywords:["Foodie","Design","Caffè","Brunch","Arte"],
     center:[45.463,9.189], price:10,
     poi:[
-      {name:"Trippa",type:"Ristorante",coords:[45.4508,9.2054]},
-      {name:"Bar Luce",type:"Caffè",coords:[45.4516,9.1796]},
-      {name:"Pavé",type:"Bakery",coords:[45.4773,9.2058]},
+      {name:"Trippa",type:"Ristorante",coords:[45.4508,9.2054], desc: "Il mio posto preferito per piatti autentici e un’atmosfera senza fronzoli."},
+      {name:"Bar Luce",type:"Caffè",coords:[45.4516,9.1796], desc: "Firmato Wes Anderson: ogni dettaglio sembra uscito da un film."},
+      {name:"Pavé",type:"Bakery",coords:[45.4773,9.2058], desc: "Croissant e cappuccino perfetti, il mio rituale del sabato mattina."},
       {name:"10 Corso Como",type:"Concept",coords:[45.4848,9.1849]},
-      {name:"Isola Murales",type:"Passeggiata",coords:[45.4897,9.1911]},
-      {name:"Eutopia",type:"Wine Bar",coords:[45.4706,9.2069]},
+      {name:"Isola Murales",type:"Passeggiata",coords:[45.4897,9.1911], desc: "Un percorso colorato tra street art e scorci di quartiere."},
+      {name:"Eutopia",type:"Wine Bar",coords:[45.4706,9.2069], desc: "Perfetto per un calice di vino naturale e due chiacchiere tranquille."},
       {name:"Upcycle",type:"Café",coords:[45.4890,9.2276]},
-      {name:"Nonostante Marras",type:"Spazio",coords:[45.4746,9.1609]},
+      {name:"Nonostante Marras",type:"Spazio",coords:[45.4746,9.1609], desc: "Un luogo magico, tra arte, moda e un piccolo giardino segreto."},
       {name:"Drogheria Milanese",type:"Bistrot",coords:[45.4648,9.1771]},
       {name:"MAG Café",type:"Cocktail",coords:[45.4513,9.1838]},
       {name:"Pasticceria Grecchi Luigi",type:"Pasticceria",coords:[45.482353,9.166655]},
@@ -390,7 +390,7 @@ const MAPS = [
       {name:"Latteria Carlon",type:"Latteria",coords:[45.471912,9.203508]},
       {name:"La Belle Aurore",type:"Caffè Letterario",coords:[45.471893,9.214477]},
       {name:"Trattoria Sabbioneda",type:"Trattoria",coords:[45.480135,9.2088]},
-      {name:"Gelateria Umberto",type:"Gelateria",coords:[45.461894,9.206555]}
+      {name:"Gelateria Umberto",type:"Gelateria",coords:[45.461894,9.206555], desc: "Gelato alla nocciola tra i migliori di Milano!"}
     ]
   },
   { id:"mi-luca", city:"Milano", title:"Luca – Tech & Alternative Night", rating: 4.3,
@@ -400,19 +400,19 @@ const MAPS = [
     keywords:["Nightlife","Startups","Musica","Cocktail"],
     center:[45.463,9.189], price:8,
     poi:[
-      {name:"BASE",type:"Hub",coords:[45.4517,9.1702]},
-      {name:"Tempio del Futuro Perduto",type:"Spazio",coords:[45.4899,9.1802]},
-      {name:"Tunnel Club",type:"Club",coords:[45.4868,9.2018]},
+      {name:"BASE",type:"Hub",coords:[45.4517,9.1702], desc: "Coworking, mostre e dj set: il mio posto per tutto, dal mattino alla notte."},
+      {name:"Tempio del Futuro Perduto",type:"Spazio",coords:[45.4899,9.1802], desc: "Spazio autogestito incredibile: arte, musica e comunità vera."},
+      {name:"Tunnel Club",type:"Club",coords:[45.4868,9.2018], desc: "Se ami l’elettronica, questo è un classico milanese."},
       {name:"FAQ",type:"Club",coords:[45.4653,9.1910]},
       {name:"Le Biciclette",type:"Bar",coords:[45.4616,9.1865]},
-      {name:"Spirit de Milan",type:"Club",coords:[45.5185,9.1408]},
+      {name:"Spirit de Milan",type:"Club",coords:[45.5185,9.1408], desc: "Balera vintage e birra sotto le luci calde. Energia unica."},
       {name:"NoLo",type:"Quartiere",coords:[45.4970,9.2185]},
       {name:"Bar Nievo",type:"Bar Storico",coords:[45.493969,9.144644]},
       {name:"Zodiaco Bar",type:"Bar",coords:[45.479552,9.183431]},
       {name:"Bar Tabacchi Gallo - Tavola Fredda",type:"Bar di quartiere",coords:[45.500369,9.178446]},
       {name:"Trattoria da Tomaso",type:"Trattoria popolare",coords:[45.485598,9.191453]},
       {name:"Margy Burger",type:"Street food",coords:[45.462339,9.194208]},
-      {name:"Bocciofila Martesana Dance",type:"Bocciofila/Spazio sociale",coords:[45.502941,9.219486]},
+      {name:"Bocciofila Martesana Dance",type:"Bocciofila/Spazio sociale",coords:[45.502941,9.219486], desc: "Qui balli, mangi e chiacchieri con chiunque. Spirito milanese vero."},
       {name:"Bar Paperoga",type:"Bar alternativo",coords:[45.464807,9.23002]}
     ]
   },
@@ -423,15 +423,15 @@ const MAPS = [
     keywords:["Storia","Fotografia","Giardini","Relax"],
     center:[41.9028,12.4964], price:12,
     poi:[
-      {name:"Gianicolo",type:"Panorama",coords:[41.8925,12.4612]},
-      {name:"Coppedè",type:"Quartiere",coords:[41.9197,12.5116]},
-      {name:"Orto Botanico",type:"Giardino",coords:[41.8938,12.4660]},
+      {name:"Gianicolo",type:"Panorama",coords:[41.8925,12.4612], desc: "Il tramonto più romantico di Roma. Sempre."},
+      {name:"Coppedè",type:"Quartiere",coords:[41.9197,12.5116], desc: "Un angolo surreale di Roma, tra liberty e fantasia."},
+      {name:"Orto Botanico",type:"Giardino",coords:[41.8938,12.4660], desc: "Silenzio, verde e pace nel cuore di Trastevere."},
       {name:"Mercato Testaccio",type:"Mercato",coords:[41.8778,12.4763]},
       {name:"Via Margutta",type:"Strada",coords:[41.9074,12.4798]},
       {name:"Villa Torlonia",type:"Parco",coords:[41.9142,12.5112]},
-      {name:"Sant'Eustachio",type:"Caffè",coords:[41.8996,12.4761]},
+      {name:"Sant'Eustachio",type:"Caffè",coords:[41.8996,12.4761], desc: "Il caffè più cremoso di Roma, segreto ben custodito dai locali."},
       {name:"Fori Imperiali (alba)",type:"Passeggiata",coords:[41.8923,12.4853]},
-      {name:"Giardino degli Aranci",type:"Panorama",coords:[41.8817,12.4792]},
+      {name:"Giardino degli Aranci",type:"Panorama",coords:[41.8817,12.4792], desc: "Vista mozzafiato sul Tevere, perfetta per staccare tutto."},
     ]
   },
   { id:"rm-davide", city:"Roma", title:"Davide – Street Food & Nightlife", rating: 4.2,
@@ -441,10 +441,10 @@ const MAPS = [
     keywords:["Street food","Nightlife","Birre","Aperitivi"],
     center:[41.9028,12.4964], price:10,
     poi:[
-      {name:"Trapizzino Testaccio",type:"Street food",coords:[41.8769,12.4769]},
-      {name:"Open Baladin",type:"Birreria",coords:[41.8984,12.4737]},
-      {name:"Drink Kong",type:"Cocktail",coords:[41.9000,12.4797]},
-      {name:"Pigneto",type:"Quartiere",coords:[41.8895,12.5361]},
+      {name:"Trapizzino Testaccio",type:"Street food",coords:[41.8769,12.4769], desc: "Il re dello street food romano. Polpette al sugo nel pane: geniale."},
+      {name:"Open Baladin",type:"Birreria",coords:[41.8984,12.4737], desc: "Birre artigianali top e atmosfera easy. Ottimo punto di partenza per la serata."},
+      {name:"Drink Kong",type:"Cocktail",coords:[41.9000,12.4797], desc: "Cocktail bar futuristico e super curato. Non sembra neanche Roma."},
+      {name:"Pigneto",type:"Quartiere",coords:[41.8895,12.5361], desc: "Quartiere vivo e colorato, perfetto per una serata tra bar e murales."},
       {name:"Dar Poeta",type:"Pizzeria",coords:[41.8908,12.4687]},
       {name:"San Lorenzo",type:"Zona",coords:[41.9009,12.5203]},
       {name:"Tiberis",type:"Area estiva",coords:[41.9251,12.4677]},
@@ -634,8 +634,12 @@ document.getElementById('startChat').addEventListener('click',()=>{
     }
     tokens--;
     setChatTokens(tokens);
+  
+    if (tokens === 0) {
+      alert("Hai esaurito le chat gratuite. Scopri i piani disponibili per continuare a chattare!");
+      openSubscriptionModal();
+    }
   }
-
   trackEvent({event:'chat_attempt',mapId:current.id,city:current.city});
   alert('La chat con il Local non è ancora disponibile, ma sarà aggiunta presto!');
 });
@@ -781,6 +785,14 @@ border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.25);">
   <div id="tutorialStep" style="max-width:400px;font-size:18px;line-height:1.6;"></div>
   <button id="tutorialNext" class="btn btn-primary" style="margin-top:20px;">Avanti</button>
 </div>
+
+<!-- Bottone reset temporaneo -->
+<button onclick="fullResetLocalsApp()" 
+  style="position:fixed;bottom:10px;left:10px;z-index:9999;
+         background:#e53935;color:#fff;border:none;
+         padding:8px 12px;border-radius:8px;font-weight:600;">
+  🔄 Reset
+</button>
   
 </body>
 </html>
