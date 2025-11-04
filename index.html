@@ -537,51 +537,59 @@ function showMap() {
     localStorage.setItem('unlockedMaps', JSON.stringify(unlocked));
   }
 
-  // Mostra contenitore
+  // ✅ Mostra contenitore
   mapWrap.style.display = 'flex';
+  const mapEl = document.getElementById('map');
 
-  // 🔹 Attendi che il container sia nel DOM e visibile
-  requestAnimationFrame(() => {
+  // ✅ Forza visibilità temporanea per Safari
+  mapEl.style.visibility = 'hidden';
+  mapEl.style.opacity = '0';
+  mapEl.style.transition = 'opacity 0.4s ease';
+
+  // ✅ Usa un piccolo delay per dare tempo al layout di aggiornarsi
+  setTimeout(() => {
+    // 🔹 Se esiste già, distruggila
+    if (mapInstance) {
+      mapInstance.remove();
+      mapInstance = null;
+    }
+
+    // 🔹 Crea nuova mappa
+    mapInstance = L.map('map', { zoomControl: true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(mapInstance);
+
+    mapInstance.setView(current.center, 13);
+
+    // ✅ Forza il rendering su Safari (invalidate + repaint)
     setTimeout(() => {
-      // 🔹 Se esiste già, distruggila per evitare canvas corrotti
-      if (mapInstance) {
-        mapInstance.remove();
-        mapInstance = null;
-      }
+      mapInstance.invalidateSize();
+      mapEl.style.visibility = 'visible';
+      mapEl.style.opacity = '1';
+    }, 400);
 
-      // 🔹 Ricrea completamente la mappa
-      mapInstance = L.map('map', { zoomControl: true });
+    // ✅ Workaround extra per Safari iOS
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      setTimeout(() => {
+        mapInstance.invalidateSize();
+        document.body.scrollTop += 1;
+        document.body.scrollTop -= 1;
+      }, 500);
+    }
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(mapInstance);
+    // 🔹 Aggiungi marker
+    markers.forEach(m => m.remove());
+    markers = [];
 
-      // 🔹 Setta la vista e forza resize
-      mapInstance.setView(current.center, 13);
-      setTimeout(() => mapInstance.invalidateSize(), 300);
-
-      // 🔹 Fix specifico per Safari iOS
-      if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        setTimeout(() => {
-          mapInstance.invalidateSize();
-          window.scrollBy(0, 1);
-          window.scrollBy(0, -1);
-        }, 400);
-      }
-
-      // 🔹 Aggiungi marker
-      markers.forEach(m => m.remove());
-      markers = [];
-
-      current.poi.forEach(p => {
-        const mk = L.marker(p.coords).addTo(mapInstance);
-        mk.bindPopup(`<b>${p.name}</b><br><small>${p.type || ''}</small>`);
-        mk.on('click', () => showPlaceInfo(p));
-        markers.push(mk);
-      });
-    }, 150);
-  });
+    current.poi.forEach(p => {
+      const mk = L.marker(p.coords).addTo(mapInstance);
+      mk.bindPopup(`<b>${p.name}</b><br><small>${p.type || ''}</small>`);
+      mk.on('click', () => showPlaceInfo(p));
+      markers.push(mk);
+    });
+  }, 250);
 }
 function showPlaceInfo(p){
   const info=document.getElementById('placeInfo');
