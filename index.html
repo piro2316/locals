@@ -160,7 +160,7 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
 </head>
 <body>
 <div id="globalCounters" style="
-  position:fixed;top:16px;right:16px;z-index:300;
+  z-index:300;
   display:flex;flex-direction:column;gap:8px;
   align-items:flex-end;">
   
@@ -536,11 +536,13 @@ function showMap(){
     localStorage.setItem('unlockedMaps',JSON.stringify(unlocked));
   }
   mapWrap.style.display='flex';
-  if(!mapInstance){
-    mapInstance=L.map('map');
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapInstance);
+  if (mapInstance) {
+    mapInstance.remove(); // 🔹 distrugge l’istanza precedente
   }
-  setTimeout(()=>mapInstance.invalidateSize(),0);
+  mapInstance = L.map('map');
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 })
+    .addTo(mapInstance);
+  setTimeout(() => mapInstance.invalidateSize(), 200);
   markers.forEach(m=>m.remove());markers=[];
   mapInstance.setView(current.center,13);
   current.poi.forEach(p=>{
