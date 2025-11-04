@@ -120,18 +120,18 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
 
   /* 🔹 Contatori + tasto Piani su mobile */
   #globalCounters {
-    position: relative;
-    top: 0;
+    position: fixed;          /* era relative → ora fisso anche su mobile */
+    top: 8px;                 /* leggermente più basso del bordo */
     left: 0;
     width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-direction: row !important;  /* forza orizzontale anche su Safari */
     gap: 10px;
-    flex-direction: row;      /* tutto in linea orizzontale */
     background: transparent;
-    padding: 8px 0;
-    margin-top: 8px;          /* distacco dalla navbar */
+    padding: 0 8px;
+    margin: 0;                /* rimuovi margin-top */
     z-index: 300;
   }
 
@@ -155,12 +155,11 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
   }
 }
 
-
 </style>
 </head>
 <body>
 <div id="globalCounters" style="
-  z-index:300;
+  position:fixed;top:16px;right:16px;z-index:300;
   display:flex;flex-direction:column;gap:8px;
   align-items:flex-end;">
   
@@ -544,7 +543,18 @@ function showMap(){
     .addTo(mapInstance);
   setTimeout(() => mapInstance.invalidateSize(), 200);
   markers.forEach(m=>m.remove());markers=[];
-  mapInstance.setView(current.center,13);
+  mapInstance.setView(current.center, 13);
+  
+  // 🔹 Attendi che il DOM sia visibile prima di ricalcolare la mappa
+  setTimeout(() => {
+    mapInstance.invalidateSize();
+  }, 500);
+  
+  // 🔹 Forza un piccolo scroll per “risvegliare” Safari mobile
+  if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    window.scrollBy(0, 1);
+    window.scrollBy(0, -1);
+  }
   current.poi.forEach(p=>{
     const mk=L.marker(p.coords).addTo(mapInstance);
     mk.bindPopup(`<b>${p.name}</b><br><small>${p.type||''}</small>`);
