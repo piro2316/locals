@@ -539,7 +539,7 @@ function closeModal(){modal.style.display='none';modalCover.style.display='block
 document.getElementById('modalClose').addEventListener('click',closeModal);
 
 /* ---------- MAP + PLACE INFO ---------- */
-function showMap() {
+async function showMap() {
   const unlocked = JSON.parse(localStorage.getItem('unlockedMaps') || '[]');
   if (!unlocked.includes(current.id)) {
     unlocked.push(current.id);
