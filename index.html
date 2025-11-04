@@ -523,74 +523,64 @@ function openModal(id){
     unlockForm.style.display = 'grid';
   }
   document.getElementById('chatControls').style.display = 'flex';
+  updateChatUI();
 
-  updateChatUI();modal.style.display='grid';
+  // ✅ Mostra il modale
+  modal.style.display = 'grid';
+
+  // ✅ Forza il rendering DOM su Safari prima di mostrare la mappa
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      if (current) {
+        showMap(); // inizializza la mappa *solo ora* che il modale è visibile
+      }
+    }, 350);
+  });
 }
+
 function closeModal(){modal.style.display='none';modalCover.style.display='block';}
 document.getElementById('modalClose').addEventListener('click',closeModal);
 
 /* ---------- MAP + PLACE INFO ---------- */
 function showMap() {
-  const unlocked = JSON.parse(localStorage.getItem('unlockedMaps') || '[]');
-  if (!unlocked.includes(current.id)) {
-    unlocked.push(current.id);
-    localStorage.setItem('unlockedMaps', JSON.stringify(unlocked));
+  const mapEl = document.getElementById('map');
+  mapWrap.style.display = 'flex';
+
+  if (mapInstance) {
+    mapInstance.remove();
+    mapInstance = null;
   }
 
-  // ✅ Mostra contenitore
-  mapWrap.style.display = 'flex';
-  const mapEl = document.getElementById('map');
+  mapInstance = L.map('map', { zoomControl: true });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(mapInstance);
 
-  // ✅ Forza visibilità temporanea per Safari
-  mapEl.style.visibility = 'hidden';
-  mapEl.style.opacity = '0';
-  mapEl.style.transition = 'opacity 0.4s ease';
+  mapInstance.setView(current.center, 13);
 
-  // ✅ Usa un piccolo delay per dare tempo al layout di aggiornarsi
+  // ✅ Forza dimensione e reflow dopo breve delay
   setTimeout(() => {
-    // 🔹 Se esiste già, distruggila
-    if (mapInstance) {
-      mapInstance.remove();
-      mapInstance = null;
-    }
+    mapInstance.invalidateSize();
 
-    // 🔹 Crea nuova mappa
-    mapInstance = L.map('map', { zoomControl: true });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(mapInstance);
-
-    mapInstance.setView(current.center, 13);
-
-    // ✅ Forza il rendering su Safari (invalidate + repaint)
-    setTimeout(() => {
-      mapInstance.invalidateSize();
-      mapEl.style.visibility = 'visible';
-      mapEl.style.opacity = '1';
-    }, 400);
-
-    // ✅ Workaround extra per Safari iOS
+    // Fix specifico per Safari
     if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      setTimeout(() => {
-        mapInstance.invalidateSize();
-        document.body.scrollTop += 1;
-        document.body.scrollTop -= 1;
-      }, 500);
+      document.body.scrollTop += 1;
+      document.body.scrollTop -= 1;
     }
+  }, 300);
 
-    // 🔹 Aggiungi marker
-    markers.forEach(m => m.remove());
-    markers = [];
-
-    current.poi.forEach(p => {
-      const mk = L.marker(p.coords).addTo(mapInstance);
-      mk.bindPopup(`<b>${p.name}</b><br><small>${p.type || ''}</small>`);
-      mk.on('click', () => showPlaceInfo(p));
-      markers.push(mk);
-    });
-  }, 250);
+  // Marker
+  markers.forEach(m => m.remove());
+  markers = [];
+  current.poi.forEach(p => {
+    const mk = L.marker(p.coords).addTo(mapInstance);
+    mk.bindPopup(`<b>${p.name}</b><br><small>${p.type || ''}</small>`);
+    mk.on('click', () => showPlaceInfo(p));
+    markers.push(mk);
+  });
 }
+
 function showPlaceInfo(p){
   const info=document.getElementById('placeInfo');
   document.getElementById('placeTitle').textContent=p.name||'';
