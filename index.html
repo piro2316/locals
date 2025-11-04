@@ -153,6 +153,10 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
     color: #fff;
     cursor: pointer;
   }
+
+  .header {
+    margin-top: 50px;
+  }
 }
 
 </style>
@@ -363,7 +367,6 @@ function trackEvent(payload){
 /* ---------- DATA ---------- */
 const imgPath = (name) => `covers/${name}`;
 const MAPS = [
-  // Milano – più POI con popup
   { id:"mi-giulia", city:"Milano", title:"Giulia – Foodie & Design", rating: 5.0,
     cover: imgPath("mi-giulia.webp"),
     subtitle:"Product designer e pasticcerie d’autore",
@@ -412,8 +415,6 @@ const MAPS = [
       {name:"Bar Paperoga",type:"Bar alternativo",coords:[45.464807,9.23002]}
     ]
   },
-
-  // Roma
   { id:"rm-sara", city:"Roma", title:"Sara – Classici & Nascosti", rating: 5.0,
     cover: imgPath("rm-sara.webp"),
     subtitle:"Archivista e cortili segreti",
@@ -528,37 +529,38 @@ function closeModal(){modal.style.display='none';modalCover.style.display='block
 document.getElementById('modalClose').addEventListener('click',closeModal);
 
 /* ---------- MAP + PLACE INFO ---------- */
-function showMap(){
-  const unlocked=JSON.parse(localStorage.getItem('unlockedMaps')||'[]');
-  if(!unlocked.includes(current.id)){
+function showMap() {
+  const unlocked = JSON.parse(localStorage.getItem('unlockedMaps') || '[]');
+  if (!unlocked.includes(current.id)) {
     unlocked.push(current.id);
-    localStorage.setItem('unlockedMaps',JSON.stringify(unlocked));
+    localStorage.setItem('unlockedMaps', JSON.stringify(unlocked));
   }
-  mapWrap.style.display='flex';
-  if (mapInstance) {
-    mapInstance.remove(); // 🔹 distrugge l’istanza precedente
+  mapWrap.style.display = 'flex';
+
+  if (!mapInstance) {
+    mapInstance = L.map('map');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 })
+      .addTo(mapInstance);
   }
-  mapInstance = L.map('map');
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 })
-    .addTo(mapInstance);
-  setTimeout(() => mapInstance.invalidateSize(), 200);
-  markers.forEach(m=>m.remove());markers=[];
+
   mapInstance.setView(current.center, 13);
-  
-  // 🔹 Attendi che il DOM sia visibile prima di ricalcolare la mappa
   setTimeout(() => {
     mapInstance.invalidateSize();
-  }, 500);
-  
-  // 🔹 Forza un piccolo scroll per “risvegliare” Safari mobile
+  }, 300);
+
+  // workaround Safari iOS per forzare il repaint
   if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-    window.scrollBy(0, 1);
-    window.scrollBy(0, -1);
+    setTimeout(() => window.scrollBy(0, 1), 350);
+    setTimeout(() => window.scrollBy(0, -1), 400);
   }
-  current.poi.forEach(p=>{
-    const mk=L.marker(p.coords).addTo(mapInstance);
-    mk.bindPopup(`<b>${p.name}</b><br><small>${p.type||''}</small>`);
-    mk.on('click',()=>showPlaceInfo(p));
+
+  markers.forEach(m => m.remove());
+  markers = [];
+
+  current.poi.forEach(p => {
+    const mk = L.marker(p.coords).addTo(mapInstance);
+    mk.bindPopup(`<b>${p.name}</b><br><small>${p.type || ''}</small>`);
+    mk.on('click', () => showPlaceInfo(p));
     markers.push(mk);
   });
 }
@@ -705,6 +707,19 @@ function selectPlan(plan){
   closeSubscriptionModal();
 }
 
+/* ---------- DEBUG / RESET ---------- */
+function fullResetLocalsApp() {
+  try {
+    localStorage.clear();
+    sessionStorage.clear();
+    if ('caches' in window) {
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    }
+    alert("✅ Tutto resettato! Ricarica la pagina per ripartire da zero.");
+  } catch (err) {
+    alert("Errore nel reset: " + err.message);
+  }
+}
 </script>
 
 <!-- Subscription modal -->
@@ -760,6 +775,15 @@ border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.25);">
   <div id="tutorialStep" style="max-width:400px;font-size:18px;line-height:1.6;"></div>
   <button id="tutorialNext" class="btn btn-primary" style="margin-top:20px;">Avanti</button>
 </div>
+
+/* ---------- DEBUG / RESET ---------- */
+<!-- Bottone reset temporaneo -->
+<button onclick="fullResetLocalsApp()" 
+  style="position:fixed;bottom:10px;left:10px;z-index:9999;
+         background:#e53935;color:#fff;border:none;
+         padding:8px 12px;border-radius:8px;font-weight:600;">
+  🔄 Reset
+</button>
   
 </body>
 </html>
