@@ -527,14 +527,6 @@ function openModal(id){
 
   // Mostra il modale
   modal.style.display = 'grid';
-
-  // 🔹 Mostra la mappa solo se è già sbloccata
-  const unlocked = JSON.parse(localStorage.getItem('unlockedMaps') || '[]');
-  if (unlocked.includes(current.id)) {
-    showMap();
-  } else {
-    mapWrap.style.display = 'none';
-  }
 }
 
 function closeModal(){modal.style.display='none';modalCover.style.display='block';}
