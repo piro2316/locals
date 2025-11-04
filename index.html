@@ -117,11 +117,44 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
   .section-title{font-size:18px;margin:18px 0 10px}
   .modal img{display:none}
   #map{height:280px}
-  #globalCounters{
-    top:auto;bottom:16px;right:16px;
-    flex-direction:row;align-items:center;
+
+  /* 🔹 Spostamento e stile dei contatori su mobile */
+  #globalCounters {
+    position: fixed;
+    top: 6px;                /* appena sotto la barra del browser */
+    left: 50%;               /* centrato orizzontalmente */
+    transform: translateX(-50%);
+    flex-direction: row;     /* affiancati */
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 6px 12px;
+    border-radius: 999px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    z-index: 300;
   }
+
+  #globalCounters > div {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    box-shadow: none;
+  }
+
+  #openPlansBtn {
+    bottom: 12px;
+    right: 12px;
+    font-size: 13px;
+    padding: 9px 14px;
+    border-radius: 999px;
+  }  
 }
+
+
 </style>
 </head>
 <body>
@@ -146,6 +179,26 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
     💬 Chat: 1
   </div>
 </div>
+
+<button id="openPlansBtn" onclick="openSubscriptionModal()" 
+  style="
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    z-index:250;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    color:#fff;
+    border:none;
+    padding:10px 16px;
+    border-radius:999px;
+    font-weight:600;
+    font-size:14px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.15);
+    cursor:pointer;
+  ">
+  💡 Piani
+</button>
+
 <div class="container">
   <header class="header">
     <div style="display:flex;align-items:center;gap:10px">
@@ -240,13 +293,13 @@ const FEEDBACK_FORM = "https://docs.google.com/forms/d/e/1FAIpQLSf0jr7X3hJ_rl4l2
 const FEEDBACK_DELAY_MS = 10000;
 
 /* ---------- CHAT TOKENS ---------- */
-const CHAT_TOKENS_KEY = 'chatTokens';
+const CHAT_TOKENS_KEY = 'ChatTokens';
 if(localStorage.getItem(CHAT_TOKENS_KEY)===null) localStorage.setItem(CHAT_TOKENS_KEY,'1');
 function getChatTokens(){ return Number(localStorage.getItem(CHAT_TOKENS_KEY)||1); }
 function setChatTokens(n){ localStorage.setItem(CHAT_TOKENS_KEY,String(n)); updateChatUI(); }
   
 /* ---------- MAP TOKENS ---------- */
-const MAP_TOKENS_KEY = 'mapTokens';
+const MAP_TOKENS_KEY = 'MapTokens';
 if (localStorage.getItem(MAP_TOKENS_KEY) === null) localStorage.setItem(MAP_TOKENS_KEY, '1');
 
 function getMapTokens() {
@@ -258,7 +311,7 @@ function setMapTokens(n) {
 }
 
 /* ---------- SUBSCRIPTION STATE ---------- */
-const SUBSCRIPTION_KEY = 'subscriptionActive';
+const SUBSCRIPTION_KEY = 'SubscriptionActive';
 function hasSubscription(){
   return localStorage.getItem(SUBSCRIPTION_KEY) === 'true';
 }
@@ -513,33 +566,48 @@ function showPlaceInfo(p){
 document.getElementById('closePlaceInfo').addEventListener('click',()=>document.getElementById('placeInfo').style.display='none');
 
 /* ---------- UNLOCK FORM ---------- */
-unlockForm.addEventListener('submit',async e=>{
+unlockForm.addEventListener('submit', async e => {
   e.preventDefault();
-  const email=emailInput.value.trim();
-  if(!email){alert("Inserisci un'email valida");return;}
-  await fetch(SUBMIT_ENDPOINT,{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      event:'unlock_map',email,mapId:current.id,city:current.city,
-      priceSelected:current.price,
-      interests:Array.from(document.querySelectorAll('.keyword.active')).map(x=>x.textContent)
+  const email = emailInput.value.trim();
+  if (!email) {
+    alert("Inserisci un'email valida");
+    return;
+  }
+
+  await fetch(SUBMIT_ENDPOINT, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      event: 'unlock_map', email, mapId: current.id, city: current.city,
+      priceSelected: current.price,
+      interests: Array.from(document.querySelectorAll('.keyword.active')).map(x => x.textContent)
     })
-  }).catch(()=>{});
-  showMap();unlockForm.style.display='none';
+  }).catch(() => {});
+
+  let remainingMaps = getMapTokens();
+
   if (!hasSubscription()) {
-    let remainingMaps = getMapTokens();
     if (remainingMaps > 0) {
       remainingMaps--;
       setMapTokens(remainingMaps);
-      updateGlobalCounters();
+      showMap();
+      unlockForm.style.display = 'none';
+
+      if (remainingMaps === 0) {
+        alert("Hai terminato gli sblocchi gratuiti! Ora puoi abbonarti per avere accesso illimitato, oppure acquistare mappe singolarmente.");
+        openSubscriptionModal();
+      }
     } else {
-      alert("Hai esaurito gli sblocchi gratuiti. Scopri le opzioni di abbonamento!");
-      openSubscriptionModal();
-      return;
+      // Crediti terminati → sblocco ma al prezzo pieno
+      showMap();
+      unlockForm.style.display = 'none';
     }
+  } else {
+    showMap();
+    unlockForm.style.display = 'none';
   }
-  document.getElementById('chatControls').style.display='flex';
-  scheduleFeedback(current.id,email);
+
+  document.getElementById('chatControls').style.display = 'flex';
+  scheduleFeedback(current.id, email);
 });
 
 /* ---------- CHAT ---------- */
