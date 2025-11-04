@@ -120,17 +120,17 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
 
   /* 🔹 Spostamento e stile dei contatori su mobile */
   #globalCounters {
-    position: fixed;
-    top: 6px;                /* appena sotto la barra del browser */
-    left: 50%;               /* centrato orizzontalmente */
-    transform: translateX(-50%);
-    flex-direction: row;     /* affiancati */
+    position: absolute;
+    top: 0;                         /* in cima al contenuto */
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;        /* centrati orizzontalmente */
     align-items: center;
     gap: 10px;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 6px 12px;
-    border-radius: 999px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    flex-direction: row;            /* affiancati */
+    background: transparent;
+    padding: 8px 0;
     z-index: 300;
   }
 
@@ -138,11 +138,11 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
     background: #fff;
     border: 1px solid var(--border);
     border-radius: 999px;
-    padding: 4px 8px;
+    padding: 4px 10px;
     font-size: 13px;
     font-weight: 600;
     color: var(--accent);
-    box-shadow: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
   }
 
   #openPlansBtn {
@@ -183,7 +183,7 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
 <button id="openPlansBtn" onclick="openSubscriptionModal()" 
   style="
     position:fixed;
-    bottom:20px;
+    bottom:80px; 
     right:20px;
     z-index:250;
     background:linear-gradient(90deg,var(--accent),var(--accent2));
@@ -650,7 +650,7 @@ function scheduleFeedback(mapId,email){
 /* ---------- TUTORIAL ---------- */
 const tutorialSteps = [
   "Benvenuto su Locals! 🎉 Hai 1 mappa e 1 chat gratuite per iniziare.",
-  "Guarda in alto a destra 🔝 per vedere quanti sblocchi ti restano.",
+  "Guarda in alto 🔝 per vedere quanti sblocchi ti restano.",
   "Per sbloccare una mappa inserisci la tua email. Tutto è gratuito e senza addebiti!"
 ];
 let currentStep = 0;
