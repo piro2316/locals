@@ -118,27 +118,29 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
   .modal img{display:none}
   #map{height:280px}
 
-  /* 🔹 Spostamento e stile dei contatori su mobile */
+  /* 🔹 Contatori + tasto Piani su mobile */
   #globalCounters {
-    position: absolute;
-    top: 0;                         /* in cima al contenuto */
+    position: relative;
+    top: 0;
     left: 0;
     width: 100%;
     display: flex;
-    justify-content: center;        /* centrati orizzontalmente */
+    justify-content: center;
     align-items: center;
     gap: 10px;
-    flex-direction: row;            /* affiancati */
+    flex-direction: row;      /* tutto in linea orizzontale */
     background: transparent;
     padding: 8px 0;
+    margin-top: 8px;          /* distacco dalla navbar */
     z-index: 300;
   }
 
-  #globalCounters > div {
+  #globalCounters > div,
+  #openPlansBtn {
     background: #fff;
     border: 1px solid var(--border);
     border-radius: 999px;
-    padding: 4px 10px;
+    padding: 6px 12px;
     font-size: 13px;
     font-weight: 600;
     color: var(--accent);
@@ -146,12 +148,11 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
   }
 
   #openPlansBtn {
-    bottom: 12px;
-    right: 12px;
-    font-size: 13px;
-    padding: 9px 14px;
-    border-radius: 999px;
-  }  
+    position: static;         /* non fixed */
+    background: linear-gradient(90deg,var(--accent),var(--accent2));
+    color: #fff;
+    cursor: pointer;
+  }
 }
 
 
@@ -178,26 +179,23 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
     font-size:14px;font-weight:600;color:var(--accent);">
     💬 Chat: 1
   </div>
-</div>
 
-<button id="openPlansBtn" onclick="openSubscriptionModal()" 
-  style="
-    position:fixed;
-    bottom:80px; 
-    right:20px;
-    z-index:250;
-    background:linear-gradient(90deg,var(--accent),var(--accent2));
-    color:#fff;
-    border:none;
-    padding:10px 16px;
-    border-radius:999px;
-    font-weight:600;
-    font-size:14px;
-    box-shadow:0 4px 10px rgba(0,0,0,0.15);
-    cursor:pointer;
-  ">
-  💡 Piani
-</button>
+  <button id="openPlansBtn" onclick="openSubscriptionModal()" 
+    style="
+      background:linear-gradient(90deg,var(--accent),var(--accent2));
+      color:#fff;
+      border:none;
+      padding:8px 14px;
+      border-radius:999px;
+      font-weight:600;
+      font-size:13px;
+      box-shadow:0 4px 10px rgba(0,0,0,0.15);
+      cursor:pointer;
+      margin-top:6px;
+      align-self:flex-end;">
+    💡 Piani
+  </button>
+</div>
 
 <div class="container">
   <header class="header">
