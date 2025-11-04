@@ -525,17 +525,16 @@ function openModal(id){
   document.getElementById('chatControls').style.display = 'flex';
   updateChatUI();
 
-  // ✅ Mostra il modale
+  // Mostra il modale
   modal.style.display = 'grid';
 
-  // ✅ Forza il rendering DOM su Safari prima di mostrare la mappa
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      if (current) {
-        showMap(); // inizializza la mappa *solo ora* che il modale è visibile
-      }
-    }, 350);
-  });
+  // 🔹 Mostra la mappa solo se è già sbloccata
+  const unlocked = JSON.parse(localStorage.getItem('unlockedMaps') || '[]');
+  if (unlocked.includes(current.id)) {
+    showMap();
+  } else {
+    mapWrap.style.display = 'none';
+  }
 }
 
 function closeModal(){modal.style.display='none';modalCover.style.display='block';}
@@ -543,42 +542,51 @@ document.getElementById('modalClose').addEventListener('click',closeModal);
 
 /* ---------- MAP + PLACE INFO ---------- */
 function showMap() {
-  const mapEl = document.getElementById('map');
-  mapWrap.style.display = 'flex';
-
-  if (mapInstance) {
-    mapInstance.remove();
-    mapInstance = null;
+  const unlocked = JSON.parse(localStorage.getItem('unlockedMaps') || '[]');
+  if (!unlocked.includes(current.id)) {
+    unlocked.push(current.id);
+    localStorage.setItem('unlockedMaps', JSON.stringify(unlocked));
   }
 
-  mapInstance = L.map('map', { zoomControl: true });
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
-  }).addTo(mapInstance);
+  // 🔹 Mostra contenitore mappa
+  mapWrap.style.display = 'flex';
 
-  mapInstance.setView(current.center, 13);
-
-  // ✅ Forza dimensione e reflow dopo breve delay
+  // 🔹 Attendi che il DOM sia realmente visibile
   setTimeout(() => {
-    mapInstance.invalidateSize();
-
-    // Fix specifico per Safari
-    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      document.body.scrollTop += 1;
-      document.body.scrollTop -= 1;
+    if (mapInstance) {
+      mapInstance.remove();
+      mapInstance = null;
     }
-  }, 300);
 
-  // Marker
-  markers.forEach(m => m.remove());
-  markers = [];
-  current.poi.forEach(p => {
-    const mk = L.marker(p.coords).addTo(mapInstance);
-    mk.bindPopup(`<b>${p.name}</b><br><small>${p.type || ''}</small>`);
-    mk.on('click', () => showPlaceInfo(p));
-    markers.push(mk);
-  });
+    const mapEl = document.getElementById('map');
+    mapInstance = L.map(mapEl, { zoomControl: true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(mapInstance);
+
+    mapInstance.setView(current.center, 13);
+
+    // 🔹 Forza rendering e reflow su Safari
+    setTimeout(() => {
+      mapInstance.invalidateSize();
+      if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        document.body.scrollTop += 1;
+        document.body.scrollTop -= 1;
+      }
+    }, 500);
+
+    // 🔹 Aggiungi i marker
+    markers.forEach(m => m.remove());
+    markers = [];
+
+    current.poi.forEach(p => {
+      const mk = L.marker(p.coords).addTo(mapInstance);
+      mk.bindPopup(`<b>${p.name}</b><br><small>${p.type || ''}</small>`);
+      mk.on('click', () => showPlaceInfo(p));
+      markers.push(mk);
+    });
+  }, 350);
 }
 
 function showPlaceInfo(p){
