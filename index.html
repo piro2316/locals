@@ -159,6 +159,9 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
   }
 }
 
+/* ---------- DEBUG / REMOVE RESET ---------- */
+#resetBtn { display: none; }
+
 </style>
 </head>
 <body>
@@ -185,18 +188,19 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
 
   <button id="openPlansBtn" onclick="openSubscriptionModal()" 
     style="
-      background:linear-gradient(90deg,var(--accent),var(--accent2));
-      color:#fff;
-      border:none;
-      padding:8px 14px;
-      border-radius:999px;
-      font-weight:600;
-      font-size:13px;
-      box-shadow:0 4px 10px rgba(0,0,0,0.15);
-      cursor:pointer;
-      margin-top:6px;
-      align-self:flex-end;">
-    💡 Piani
+        background:linear-gradient(90deg,#ffb347,#ff7b00);
+        color:#fff;
+        border:none;
+        padding:8px 14px;
+        border-radius:999px;
+        font-weight:600;
+        font-size:13px;
+        box-shadow:0 4px 10px rgba(0,0,0,0.15);
+        cursor:pointer;
+        margin-top:6px;
+        align-self:flex-end;
+        transition:transform .2s ease;">
+      💡 Piani
   </button>
 </div>
 
@@ -605,7 +609,7 @@ unlockForm.addEventListener('submit', async e => {
       unlockForm.style.display = 'none';
 
       if (remainingMaps === 0) {
-        alert("Hai terminato gli sblocchi gratuiti! Ora puoi abbonarti per avere accesso illimitato, oppure acquistare mappe singolarmente.");
+        alert("Hai esaurito gli sblocchi gratuiti. Scopri le opzioni di abbonamento, oppure acquista le mappe singolarmente!");
         openSubscriptionModal();
       }
     } else {
@@ -744,7 +748,12 @@ function fullResetLocalsApp() {
     <div style="font-size:13px;color:#444;font-weight:600;margin-top:4px;">
       * Nessun addebito reale
     </div>
-    <button onclick="closeSubscriptionModal()" style="background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;">Chiudi</button>
+      <button onclick="closeSubscriptionModal()" 
+        style="background:#f4f3ff;border:1px solid var(--border);
+               color:var(--accent);font-weight:700;padding:8px 14px;
+               border-radius:10px;cursor:pointer;transition:all .2s;">
+        ✕ Chiudi
+      </button>
   </div>
 </div>
 
