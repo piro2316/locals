@@ -60,7 +60,7 @@ box-shadow:0 4px 8px var(--shadow);transition:transform .15s ease, box-shadow .1
 
 /* Modal */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);
-display:none;place-items:center;z-index:100;}
+display:none;place-items:center;z-index:1000;}
 .modal{width:min(760px,96%);background:#fff;border-radius:16px;overflow:hidden;
 display:flex;flex-direction:column;max-height:90vh;}
 .modal-head{padding:12px 16px;border-bottom:1px solid var(--border);
@@ -92,6 +92,10 @@ border-radius:10px;font-size:14.5px;width:100%}
   pointer-events: auto;
 }
 #map{height:360px;border-radius:12px;border:1px solid var(--border)}
+
+/* iOS Safari + Leaflet: evita shrink dei tile e forza compositing */
+.leaflet-container img { max-width: none !important; }
+#map { will-change: transform; transform: translateZ(0); }
 
 /* Place info */
 #placeInfo{
@@ -491,42 +495,44 @@ const mapWrap=document.getElementById('mapWrap');
 let current=null,mapInstance=null,markers=[];
 
 function openModal(id){
-  current=MAPS.find(x=>x.id===id);
-  modalTitle.textContent=current.title;
-  modalSubtitle.textContent=current.subtitle;
-  modalCover.src=current.cover;
-  modalCover.style.display='none'; // nasconde copertina
-  modalAbout.textContent=current.about;
-  keywordsBox.innerHTML="";
+  current = MAPS.find(x => x.id === id);
+  modalTitle.textContent = current.title;
+  modalSubtitle.textContent = current.subtitle;
+  modalCover.src = current.cover;
+  modalCover.style.display = 'none';
+  modalAbout.textContent = current.about;
+  keywordsBox.innerHTML = "";
   current.keywords.forEach(k=>{
     const el=document.createElement('div');
-    el.className='keyword';el.textContent=k;
+    el.className='keyword'; el.textContent=k;
     el.onclick=()=>el.classList.toggle('active');
     keywordsBox.appendChild(el);
   });
+
+  // Aggiorna prezzo
   const mapPriceEl = document.getElementById('priceInfo');
   const freeMaps = getMapTokens();
   if (freeMaps > 0) {
-    // Mostra prezzo barrato e gratuito
     mapPriceEl.innerHTML = `<span style="text-decoration:line-through;opacity:0.7;">${current.price}€</span> <span style="color:green;font-weight:700;">Gratis</span>`;
   } else {
-    // Mostra prezzo normale
     mapPriceEl.innerHTML = `<span style="font-weight:600;color:var(--accent);">${current.price}€</span>`;
   }
-  const unlocked=JSON.parse(localStorage.getItem('unlockedMaps')||'[]');
+
+  // ⚠️ Mostra SUBITO il modale (importante per iOS)
+  modal.style.display = 'grid';
+
+  const unlocked = JSON.parse(localStorage.getItem('unlockedMaps') || '[]');
   if (unlocked.includes(current.id)) {
-    mapWrap.style.display = 'flex';
-    showMap();
     unlockForm.style.display = 'none';
+    mapWrap.style.display = 'flex';
+    showMap(); // ora la mappa parte con contenitore visibile
   } else {
-    mapWrap.style.display = 'none';
     unlockForm.style.display = 'grid';
+    mapWrap.style.display = 'none';
   }
+
   document.getElementById('chatControls').style.display = 'flex';
   updateChatUI();
-
-  // Mostra il modale
-  modal.style.display = 'grid';
 }
 
 function closeModal(){modal.style.display='none';modalCover.style.display='block';}
@@ -540,45 +546,43 @@ function showMap() {
     localStorage.setItem('unlockedMaps', JSON.stringify(unlocked));
   }
 
-  // 🔹 Mostra contenitore mappa
+  // Mostra il contenitore prima di creare la mappa
   mapWrap.style.display = 'flex';
 
-  // 🔹 Attendi che il DOM sia realmente visibile
-  setTimeout(() => {
-    if (mapInstance) {
-      mapInstance.remove();
-      mapInstance = null;
-    }
+  const mapEl = document.getElementById('map');
 
-    const mapEl = document.getElementById('map');
-    mapInstance = L.map(mapEl, { zoomControl: true });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(mapInstance);
+  // Aspetta che il modale/layout siano realmente visibili
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  const t0 = performance.now();
+  while ((mapEl.offsetWidth === 0 || mapEl.offsetHeight === 0) && performance.now() - t0 < 1200) {
+    await new Promise(r => requestAnimationFrame(r));
+  }
 
-    mapInstance.setView(current.center, 13);
+  // Reset sicuro
+  if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+  markers.forEach(m => m.remove());
+  markers = [];
 
-    // 🔹 Forza rendering e reflow su Safari
-    setTimeout(() => {
-      mapInstance.invalidateSize();
-      if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        document.body.scrollTop += 1;
-        document.body.scrollTop -= 1;
-      }
-    }, 500);
+  // Crea la mappa (tap:false risolve glitch touch su iOS)
+  mapInstance = L.map(mapEl, { zoomControl: true, tap: false });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(mapInstance);
+  mapInstance.setView(current.center, 13);
 
-    // 🔹 Aggiungi i marker
-    markers.forEach(m => m.remove());
-    markers = [];
+  // Invalidate multiplo per iOS
+  mapInstance.once('load', () => mapInstance.invalidateSize(true));
+  requestAnimationFrame(() => mapInstance && mapInstance.invalidateSize(true));
+  setTimeout(() => mapInstance && mapInstance.invalidateSize(true), 400);
 
-    current.poi.forEach(p => {
-      const mk = L.marker(p.coords).addTo(mapInstance);
-      mk.bindPopup(`<b>${p.name}</b><br><small>${p.type || ''}</small>`);
-      mk.on('click', () => showPlaceInfo(p));
-      markers.push(mk);
-    });
-  }, 350);
+  // Marker
+  current.poi.forEach(p => {
+    const mk = L.marker(p.coords).addTo(mapInstance);
+    mk.bindPopup(`<b>${p.name}</b><br><small>${p.type || ''}</small>`);
+    mk.on('click', () => showPlaceInfo(p));
+    markers.push(mk);
+  });
 }
 
 function showPlaceInfo(p){
