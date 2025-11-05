@@ -8,14 +8,19 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <style>
 :root{
-  --bg:#f7f7fa; --text:#1b1b24; --muted:#676a7e;
-  --accent:#7c7aac; --accent2:#a29fe2;
-  --border:#e3e4ef; --card:#ffffff;
+  --bg:#f7f7fa;
+  --text:#1b1b24;
+  --muted:#676a7e;
+  --accent:#7c7aac;
+  --accent2:#a29fe2;
+  --border:#e3e4ef;
+  --card:#ffffff;
   --shadow:rgba(124,122,172,0.1);
 }
 *{box-sizing:border-box}
 body{
-  margin:0; background:var(--bg); color:var(--text);
+  margin:0; background:var(--bg);
+  color:var(--text);
   font:16px/1.6 "Inter", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, sans-serif;
 }
 
@@ -677,29 +682,25 @@ unlockForm.addEventListener('submit', async e => {
     })
   }).catch(() => {});
 
-  let remainingMaps = getMapTokens();
-
   if (!hasSubscription()) {
+    let remainingMaps = getMapTokens();
     if (remainingMaps > 0) {
       remainingMaps--;
       setMapTokens(remainingMaps);
+      updateGlobalCounters();
       showMap();
       unlockForm.style.display = 'none';
-      if (remainingMaps === 0) {
-        if (!localStorage.getItem('subscription_modal_shown')) {
-          setTimeout(() => {
-            alert("Hai esaurito gli sblocchi gratuiti. Scopri le opzioni di abbonamento, oppure acquista le mappe singolarmente!");
-            openSubscriptionModal();
-            localStorage.setItem('subscription_modal_shown', '1');
-          }, 100);
-        } else {
-          setTimeout(() => {
-            alert("Hai esaurito gli sblocchi gratuiti. Puoi continuare a esplorare acquistando mappe singole.");
-          }, 100);
-        }
+  
+      // Se hai appena usato l'ultimo sblocco → mostra i piani
+      if (remainingMaps === 0 && !localStorage.getItem('subscription_modal_shown')) {
+        setTimeout(() => {
+          alert("Hai esaurito gli sblocchi gratuiti. Scopri le opzioni di abbonamento!");
+          openSubscriptionModal();
+          localStorage.setItem('subscription_modal_shown', '1');
+        }, 100);
       }
     } else {
-      // Crediti terminati → sblocco ma al prezzo pieno
+      // Nessun credito → sblocco a prezzo pieno
       showMap();
       unlockForm.style.display = 'none';
     }
@@ -713,19 +714,37 @@ unlockForm.addEventListener('submit', async e => {
 });
 
 /* ---------- CHAT ---------- */
-document.getElementById('startChat').addEventListener('click',()=>{
+document.getElementById('startChat').addEventListener('click', () => {
+  // 1️⃣ Primo alert: funzionalità non disponibile
+  alert('La chat con il Local non è ancora disponibile, ma sarà aggiunta presto!');
+
   if (!hasSubscription()) {
     let tokens = getChatTokens();
+
+    // 2️⃣ Se non hai più chat → mostra subito alert + modale
     if (tokens <= 0) {
-      alert('Hai esaurito le chat gratuite. Scopri le opzioni di abbonamento!');
-      openSubscriptionModal();
+      setTimeout(() => {
+        alert('Hai esaurito le chat gratuite. Scopri le opzioni di abbonamento!');
+        openSubscriptionModal();
+      }, 100);
       return;
     }
+
+    // 3️⃣ Se hai ancora chat → consumane una
     tokens--;
     setChatTokens(tokens);
+    updateGlobalCounters();
+
+    // 4️⃣ Se hai appena esaurito → mostra alert e modale
+    if (tokens === 0) {
+      setTimeout(() => {
+        alert("Hai esaurito le chat gratuite. Scopri le opzioni di abbonamento!");
+        openSubscriptionModal();
+      }, 100);
+    }
   }
-  trackEvent({event:'chat_attempt',mapId:current.id,city:current.city});
-  alert('La chat con il Local non è ancora disponibile, ma sarà aggiunta presto!');
+
+  trackEvent({ event: 'chat_attempt', mapId: current.id, city: current.city });
 });
 
 /* ---------- FEEDBACK ---------- */
