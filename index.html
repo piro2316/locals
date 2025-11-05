@@ -691,11 +691,9 @@ unlockForm.addEventListener('submit', async e => {
   
       // Se hai appena usato l'ultimo sblocco → mostra i piani
       if (remainingMaps === 0 && !localStorage.getItem('subscription_modal_shown')) {
-        setTimeout(() => {
-          alert("Hai esaurito gli sblocchi gratuiti. Scopri le opzioni di abbonamento!");
-          openSubscriptionModal();
-          localStorage.setItem('subscription_modal_shown', '1');
-        }, 100);
+        alert("Hai esaurito gli sblocchi gratuiti. Scopri le opzioni di abbonamento!");
+        openSubscriptionModal();
+        localStorage.setItem('subscription_modal_shown', '1');
         showMap();
         unlockForm.style.display = 'none';
       }
@@ -723,10 +721,8 @@ document.getElementById('startChat').addEventListener('click', () => {
 
     // 2️⃣ Se non hai più chat → mostra subito alert + modale
     if (tokens <= 0) {
-      setTimeout(() => {
-        alert('Hai esaurito le chat gratuite. Scopri le opzioni di abbonamento!');
-        openSubscriptionModal();
-      }, 100);
+      alert('Hai esaurito le chat gratuite. Scopri le opzioni di abbonamento!');
+      openSubscriptionModal();
       return;
     }
 
@@ -737,10 +733,8 @@ document.getElementById('startChat').addEventListener('click', () => {
 
     // 4️⃣ Se hai appena esaurito → mostra alert e modale
     if (tokens === 0) {
-      setTimeout(() => {
-        alert("Hai esaurito le chat gratuite. Scopri le opzioni di abbonamento!");
-        openSubscriptionModal();
-      }, 100);
+      alert("Hai esaurito le chat gratuite. Scopri le opzioni di abbonamento!");
+      openSubscriptionModal();
     }
   }
 
