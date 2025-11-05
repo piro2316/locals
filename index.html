@@ -546,37 +546,38 @@ async function showMap() {
     localStorage.setItem('unlockedMaps', JSON.stringify(unlocked));
   }
 
-  // Mostra il contenitore prima di creare la mappa
-  mapWrap.style.display = 'flex';
-
+  // 1️⃣ Mostra il contenitore PRIMA
+  mapWrap.style.display = 'block';  // <-- non "flex", iOS gestisce meglio
   const mapEl = document.getElementById('map');
+  mapEl.style.display = 'block';
+  mapEl.style.minHeight = '280px';  // sicurezza extra
 
-  // Aspetta che il modale/layout siano realmente visibili
-  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-  const t0 = performance.now();
-  while ((mapEl.offsetWidth === 0 || mapEl.offsetHeight === 0) && performance.now() - t0 < 1200) {
-    await new Promise(r => requestAnimationFrame(r));
+  // 2️⃣ Se esiste già una mappa, la resetti
+  if (mapInstance) {
+    try { mapInstance.remove(); } catch (e) {}
+    mapInstance = null;
   }
 
-  // Reset sicuro
-  if (mapInstance) { mapInstance.remove(); mapInstance = null; }
-  markers.forEach(m => m.remove());
-  markers = [];
+  // 3️⃣ Piccolo delay per far ridisegnare il layout
+  await new Promise(r => setTimeout(r, 50));
 
-  // Crea la mappa (tap:false risolve glitch touch su iOS)
-  mapInstance = L.map(mapEl, { zoomControl: true, tap: false });
+  // 4️⃣ Crea la mappa
+  mapInstance = L.map(mapEl, { tap: false });
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(mapInstance);
+
+  // 5️⃣ Forza resize multiplo (compat iOS)
+  setTimeout(() => mapInstance.invalidateSize(), 100);
+  setTimeout(() => mapInstance.invalidateSize(), 400);
+  setTimeout(() => mapInstance.invalidateSize(), 800);
+
+  // 6️⃣ Centra e aggiungi marker
   mapInstance.setView(current.center, 13);
+  markers.forEach(m => m.remove());
+  markers = [];
 
-  // Invalidate multiplo per iOS
-  mapInstance.once('load', () => mapInstance.invalidateSize(true));
-  requestAnimationFrame(() => mapInstance && mapInstance.invalidateSize(true));
-  setTimeout(() => mapInstance && mapInstance.invalidateSize(true), 400);
-
-  // Marker
   current.poi.forEach(p => {
     const mk = L.marker(p.coords).addTo(mapInstance);
     mk.bindPopup(`<b>${p.name}</b><br><small>${p.type || ''}</small>`);
@@ -745,6 +746,10 @@ function fullResetLocalsApp() {
     alert("Errore nel reset: " + err.message);
   }
 }
+
+window.onerror = (msg, src, line, col, err) => {
+  alert("⚠️ Errore JS:\n" + msg + "\n" + src + ":" + line);
+};
 </script>
 
 <!-- Subscription modal -->
