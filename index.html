@@ -113,28 +113,50 @@ border-radius:10px;font-size:14.5px;width:100%}
 background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor:pointer;font-weight:600;}
 
 /* Responsive */
-@media (max-width: 768px){
+@media (max-width: 768px) {
   .container{padding:20px 16px}
   .header img{height:42px}
-  .badge{padding:4px 10px;font-size:12px}
   .hero h1{font-size:26px}
   .hero p{font-size:15px;max-width:90%}
   .section-title{font-size:18px;margin:18px 0 10px}
-  .card{border-radius:14px}
-  .card-body{padding:10px 12px}
-  .name{font-size:15.5px}
-  .subtitle{font-size:12.5px}
-  .pill{font-size:11px;padding:4px 8px}
-  .modal{width:94%;max-height:88vh;border-radius:14px}
-  .modal img{height:180px}
-  .form{grid-template-columns:1fr;gap:6px}
-  .btn-primary{width:100%}
+  .modal img{display:none}
   #map{height:280px}
-}
-@media (max-width: 480px){
-  .hero h1{font-size:22px}
-  .hero p{font-size:14.5px}
-  .badge{display:none}
+
+  /* 🔹 Contatori centrali e orizzontali su mobile */
+  #globalCounters {
+    position: relative;          /* non fixed → evita bug iOS */
+    display: flex;
+    justify-content: center;     /* centrati orizzontalmente */
+    align-items: center;
+    flex-direction: row;         /* in linea */
+    gap: 10px;
+    background: transparent;
+    padding: 8px 0;
+    margin-top: 8px;             /* piccolo distacco dalla navbar */
+    z-index: 1;                  /* sotto al modale → non copre */
+  }
+
+  #globalCounters > div,
+  #openPlansBtn {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+
+  #openPlansBtn {
+    background: linear-gradient(90deg,var(--accent),var(--accent2));
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .header {
+    margin-top: 0; /* nessuno spazio aggiuntivo */
+  }
 }
 </style>
 </head>
