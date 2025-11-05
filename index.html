@@ -177,6 +177,52 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
   .hero p{font-size:14.5px}
   .badge{display:none}
 }
+
+/* 🔧 Fix layout mobile place info & form */
+@media (max-width:768px) {
+  #placeInfo {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  #placeInfo h4 {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  #placeInfo div[style*="display:flex;justify-content:space-between"] {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #placeInfo a#placeGoogle {
+    width: 100%;
+    margin: 10px 0 0 0 !important;
+    text-align: center;
+    font-size: 14px;
+    padding: 10px 0;
+  }
+
+  /* Fix "nessun addebito" + prezzo */
+  #unlockForm {
+    align-items: stretch !important;
+  }
+  #unlockForm > div {
+    width: 100%;
+  }
+  #priceInfo {
+    display: inline-block;
+    font-size: 15px;
+  }
+
+  /* Form e bottoni più compatti */
+  .form {
+    gap: 8px;
+  }
+  .form button {
+    width: 100%;
+  }
+}
 </style>
 </head>
 <body>
@@ -639,10 +685,18 @@ unlockForm.addEventListener('submit', async e => {
       setMapTokens(remainingMaps);
       showMap();
       unlockForm.style.display = 'none';
-
       if (remainingMaps === 0) {
-        alert("Hai esaurito gli sblocchi gratuiti. Scopri le opzioni di abbonamento, oppure acquista le mappe singolarmente!");
-        openSubscriptionModal();
+        if (!localStorage.getItem('subscription_modal_shown')) {
+          setTimeout(() => {
+            alert("Hai esaurito gli sblocchi gratuiti. Scopri le opzioni di abbonamento, oppure acquista le mappe singolarmente!");
+            openSubscriptionModal();
+            localStorage.setItem('subscription_modal_shown', '1');
+          }, 100);
+        } else {
+          setTimeout(() => {
+            alert("Hai esaurito gli sblocchi gratuiti. Puoi continuare a esplorare acquistando mappe singole.");
+          }, 100);
+        }
       }
     } else {
       // Crediti terminati → sblocco ma al prezzo pieno
@@ -663,17 +717,12 @@ document.getElementById('startChat').addEventListener('click',()=>{
   if (!hasSubscription()) {
     let tokens = getChatTokens();
     if (tokens <= 0) {
-      alert('Hai esaurito le chat disponibili. Scopri le opzioni di abbonamento!');
+      alert('Hai esaurito le chat gratuite. Scopri le opzioni di abbonamento!');
       openSubscriptionModal();
       return;
     }
     tokens--;
     setChatTokens(tokens);
-  
-    if (tokens === 0) {
-      alert("Hai esaurito le chat gratuite. Scopri i piani disponibili per continuare a chattare!");
-      openSubscriptionModal();
-    }
   }
   trackEvent({event:'chat_attempt',mapId:current.id,city:current.city});
   alert('La chat con il Local non è ancora disponibile, ma sarà aggiunta presto!');
