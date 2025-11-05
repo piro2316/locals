@@ -688,8 +688,6 @@ unlockForm.addEventListener('submit', async e => {
       remainingMaps--;
       setMapTokens(remainingMaps);
       updateGlobalCounters();
-      showMap();
-      unlockForm.style.display = 'none';
   
       // Se hai appena usato l'ultimo sblocco → mostra i piani
       if (remainingMaps === 0 && !localStorage.getItem('subscription_modal_shown')) {
@@ -698,6 +696,8 @@ unlockForm.addEventListener('submit', async e => {
           openSubscriptionModal();
           localStorage.setItem('subscription_modal_shown', '1');
         }, 100);
+        showMap();
+        unlockForm.style.display = 'none';
       }
     } else {
       // Nessun credito → sblocco a prezzo pieno
