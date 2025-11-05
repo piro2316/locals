@@ -180,7 +180,9 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
   cursor: pointer;
 }
 
-  .header { margin-top: 0; }
+  .header {
+    margin-top: 50px;
+  }
 }
 
 /* extra for very small screens */
@@ -334,7 +336,7 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
         <button id="startChat" class="btn btn-primary" style="width:100%;">Avvia chat</button>
       </div>
 
-      <div id="mapWrap" class="map-wrap" style="display:flex;flex-direction:column;gap:14px;align-items:flex-start">
+      <div id="mapWrap" class="map-wrap" style="display:flex;flex-direction:column;gap:22px;align-items:flex-start">
         <div id="map" style="width:100%"></div>
         <aside id="placeInfo"
           style="width:100%;background:#fff;border:1px solid var(--border);
@@ -848,14 +850,13 @@ window.onerror = (msg, src, line, col, err) => {
 
     <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
       <button onclick="selectPlan('pacchetto')" class="btn btn-primary">
-        💬 Pacchetto 5 chat aggiuntive – 4,99€*
+        💬 Acquista 5 chat aggiuntive – 4,99€*
       </button>
       <button onclick="selectPlan('mensile')" class="btn btn-primary">
-        🌍 Abbonamento mensile – accesso illimitato – 9,99€*
+        🌍 Acquista l'accesso illimitato – 9,99€/mese*
       </button>
     </div>
-
-    <div style="font-size:13px;color:#444;font-weight:600;margin-top:4px;">
+    <div style="font-size:13px;color:#444;font-weight:600;margin-top:2px;">
       * Nessun addebito reale
     </div>
       <button onclick="closeSubscriptionModal()" 
