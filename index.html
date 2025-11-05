@@ -144,34 +144,40 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
   #map{height:280px !important;border-radius:12px;border:1px solid var(--border)}
 
   /* 🔹 Contatori centrali e orizzontali su mobile */
-  #globalCounters {
-    position: relative;          /* NON fixed: evita problemi iOS con compositing */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: row;
-    gap: 10px;
-    background: transparent;
-    padding: 8px 0;
-    margin-top: 8px;
-    z-index: 1;
-  }
-  #globalCounters > div,
-  #openPlansBtn {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 6px 12px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--accent);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-  }
-  #openPlansBtn {
-    background: linear-gradient(90deg,var(--accent),var(--accent2));
-    color: #fff;
-    cursor: pointer;
-  }
+#globalCounters {
+  position: fixed;               /* fisso in alto */
+  top: 8px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  gap: 10px;
+  background: transparent;
+  padding: 6px 0;
+  z-index: 500;                  /* sopra header, sotto modale */
+}
+
+/* stile dei singoli badge e bottone */
+#globalCounters > div,
+#openPlansBtn {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/* tasto Piani */
+#openPlansBtn {
+  background: linear-gradient(90deg, #ffb347, #ff7b00);
+  color: #fff;
+  cursor: pointer;
+}
 
   .header { margin-top: 0; }
 }
@@ -227,6 +233,10 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
   .form button {
     width: 100%;
   }
+}
+#priceInfo span {
+  display: inline-block;
+  vertical-align: middle;
 }
 </style>
 </head>
@@ -323,7 +333,7 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
         </div>
       </form>
 
-      <div id="chatControls" style="display:none;margin-top:16px;width:100%;">
+      <div id="chatControls" style="display:none;margin-top:24px;width:100%;">
         <button id="startChat" class="btn btn-primary" style="width:100%;">Avvia chat</button>
       </div>
 
@@ -560,6 +570,7 @@ const mapWrap=document.getElementById('mapWrap');
 let current=null,mapInstance=null,markers=[];
 
 function openModal(id){
+  emailInput.value = '';
   current = MAPS.find(x => x.id === id);
   modalTitle.textContent = current.title;
   modalSubtitle.textContent = current.subtitle;
