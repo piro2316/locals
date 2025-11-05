@@ -116,26 +116,41 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
 @media (max-width: 768px) {
   .container{padding:20px 16px}
   .header img{height:42px}
+  .badge{padding:4px 10px;font-size:12px}
   .hero h1{font-size:26px}
   .hero p{font-size:15px;max-width:90%}
   .section-title{font-size:18px;margin:18px 0 10px}
-  .modal img{display:none}
-  #map{height:280px}
+
+  /* cards / layout */
+  .card{border-radius:14px}
+  .card-body{padding:10px 12px}
+  .name{font-size:15.5px}
+  .subtitle{font-size:12.5px}
+  .pill{font-size:11px;padding:4px 8px}
+
+  /* modal adjustments che aiutano il rendering map su iOS */
+  .modal{width:94%;max-height:88vh;border-radius:14px}
+  .modal-body{overflow:auto;-webkit-overflow-scrolling:touch} /* perf for iOS */
+  .modal img{height:180px;display:block}
+  .form{grid-template-columns:1fr;gap:6px}
+  .btn-primary{width:100%}
+
+  /* map: altezza esplicita (important per sicurezza) */
+  #map{height:280px !important;border-radius:12px;border:1px solid var(--border)}
 
   /* 🔹 Contatori centrali e orizzontali su mobile */
   #globalCounters {
-    position: relative;          /* non fixed → evita bug iOS */
+    position: relative;          /* NON fixed: evita problemi iOS con compositing */
     display: flex;
-    justify-content: center;     /* centrati orizzontalmente */
+    justify-content: center;
     align-items: center;
-    flex-direction: row;         /* in linea */
+    flex-direction: row;
     gap: 10px;
     background: transparent;
     padding: 8px 0;
-    margin-top: 8px;             /* piccolo distacco dalla navbar */
-    z-index: 1;                  /* sotto al modale → non copre */
+    margin-top: 8px;
+    z-index: 1;
   }
-
   #globalCounters > div,
   #openPlansBtn {
     background: #fff;
@@ -147,16 +162,20 @@ background:linear-gradient(90deg,var(--accent),var(--accent2));color:#fff;cursor
     color: var(--accent);
     box-shadow: 0 2px 6px rgba(0,0,0,0.06);
   }
-
   #openPlansBtn {
     background: linear-gradient(90deg,var(--accent),var(--accent2));
     color: #fff;
     cursor: pointer;
   }
 
-  .header {
-    margin-top: 0; /* nessuno spazio aggiuntivo */
-  }
+  .header { margin-top: 0; }
+}
+
+/* extra for very small screens */
+@media (max-width:480px){
+  .hero h1{font-size:22px}
+  .hero p{font-size:14.5px}
+  .badge{display:none}
 }
 </style>
 </head>
